@@ -1,4 +1,4 @@
-# SWE inversion for 2/19-2/26
+# SWE inversion for 2/12-2/19
 # jack tarricone
 # july 18th, 2022
 
@@ -11,9 +11,8 @@ setwd("/Users/jacktarricone/ch1_jemez_data/gpr_rasters_ryan/")
 list.files() #pwd
 
 # import corrected unwrapped phase data
-unw_raw <-rast("unw_feb19-feb26.tif")
+unw_raw <-rast("unw_corrected_feb12-19.tif")
 plot(unw_raw)
-
 
 # import i_angle raster and resample to unw grid bc of slight extent difference
 lidar_inc_raw <-rast("lidar_inc_rad.tif")
@@ -71,20 +70,20 @@ head(pit_info)
 
 # ## define static information from pits
 # # calculate density
+mean_density_feb12 <- pit_info$mean_density[1]
 mean_density_feb19 <- pit_info$mean_density[2]
-mean_density_feb26 <- pit_info$mean_density[3]
-#
+
 # # mean density between two flights
-mean_density_feb19_26 <-(mean_density_feb19 + mean_density_feb26)/2
-mean_density_feb19_26
+mean_density_feb12_19 <-(mean_density_feb12 + mean_density_feb19)/2
+mean_density_feb12_19
 
 # dielctric constant k
+k_feb12 <- pit_info$mean_k[1]
 k_feb19 <- pit_info$mean_k[2]
-k_feb26 <- pit_info$mean_k[3]
 
 # mean k between two flights
-mean_k_feb19_26 <-(k_feb19+k_feb26)/2
-mean_k_feb19_26
+mean_k_feb12_19 <-(k_feb12+k_feb19)/2
+mean_k_feb12_19
 
 #######################
 #### swe inversion ####
@@ -105,14 +104,14 @@ devtools::source_url("https://raw.githubusercontent.com/jacktarricone/snowex_uav
 # testing
 depth_change <-depth_from_phase(delta_phase = unw_snow_mask,
                                 inc_angle = lidar_inc,
-                                perm = mean_k_feb19_26,
+                                perm = mean_k_feb12_19,
                                 wavelength = uavsar_wL)
 
 plot(depth_change)
 hist(depth_change, breaks = 100)
 
 # convert to SWE change
-dswe_raw <-depth_change*(mean_density_feb19_26/1000)
+dswe_raw <-depth_change*(mean_density_feb12_19/1000)
 plot(dswe_raw)
 hist(dswe_raw, breaks = 100)
 # writeRaster(dswe_raw,"./final_swe_change/raw_dswe_feb12_26.tif")
@@ -164,5 +163,5 @@ plot(dswe_abs)
 hist(dswe_abs, breaks = 100)
 
 # save
-writeRaster(dswe_abs,"./new_swe_change/dswe_feb19-26.tif")
+# writeRaster(dswe_abs,"./new_swe_change/dswe_feb12-19.tif")
 
