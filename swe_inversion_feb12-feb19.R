@@ -2,7 +2,7 @@
 # jack tarricone
 # july 18th, 2022
 
-
+# import libraries
 library(terra)
 library(ggplot2)
 
@@ -14,7 +14,7 @@ list.files() #pwd
 unw_raw <-rast("unw_corrected_feb12-19.tif")
 plot(unw_raw)
 
-# import i_angle raster and resample to unw grid bc of slight extent difference
+# import i_angle raster in RADIANS and resample to unw grid bc of slight extent difference
 lidar_inc_raw <-rast("lidar_inc_rad.tif")
 lidar_inc_v1 <-resample(lidar_inc_raw, unw_raw)
 
@@ -57,27 +57,21 @@ plot(unw_snow_mask)
 ######### converting phase change to SWE ##############
 ########################################################
 
-#######################################################################
-# don't pick denisty and di_elec value
-# pick a density and LWC (from ryans equations and field measurements)
-# vary density and LWC over range over measured values
-########################################################################
-
 # table ryan sent over
-### use NSIDC data
+# ***** need to update this using NSIDC data ********
 pit_info <-read.csv("/Users/jacktarricone/ch1_jemez_data/pit_data/perm_pits.csv")
 head(pit_info)
 
-# ## define static information from pits
-# # calculate density
+## define static information from pits
+# calculate density
 mean_density_feb12 <- pit_info$mean_density[1]
 mean_density_feb19 <- pit_info$mean_density[2]
 
-# # mean density between two flights
+# mean density between two flights
 mean_density_feb12_19 <-(mean_density_feb12 + mean_density_feb19)/2
 mean_density_feb12_19
 
-# dielctric constant k
+# dielctric constant k for each date
 k_feb12 <- pit_info$mean_k[1]
 k_feb19 <- pit_info$mean_k[2]
 
@@ -89,17 +83,12 @@ mean_k_feb12_19
 #### swe inversion ####
 #######################
 
-# first step, define function for insar constant
-
-# inc = incidence angle raster [deg]
-# wL = sensor save length [cm]
-# k = dielectric permittivty 
+# import depth_from_phase function
+# i translated this from the uavsar_pytools package
+devtools::source_url("https://raw.githubusercontent.com/jacktarricone/snowex_uavsar/master/insar_swe_functions.R")
 
 # radar wave length from uavsar annotation file
 uavsar_wL <- 23.8403545
-
-# import depth_from_phase function
-devtools::source_url("https://raw.githubusercontent.com/jacktarricone/snowex_uavsar/master/insar_swe_functions.R")
 
 # testing
 depth_change <-depth_from_phase(delta_phase = unw_snow_mask,
@@ -107,10 +96,11 @@ depth_change <-depth_from_phase(delta_phase = unw_snow_mask,
                                 perm = mean_k_feb12_19,
                                 wavelength = uavsar_wL)
 
+# test plot
 plot(depth_change)
 hist(depth_change, breaks = 100)
 
-# convert to SWE change
+# convert to SWE change by multipling by density
 dswe_raw <-depth_change*(mean_density_feb12_19/1000)
 plot(dswe_raw)
 hist(dswe_raw, breaks = 100)
@@ -121,8 +111,7 @@ hist(dswe_raw, breaks = 100)
 ### calculating absolute SWE change ###
 #######################################
 
-# using swe change from the pit as "known" change point
-
+#### using swe change from the pit as "known" change point, which is 0 in this case
 # extent around gpr transect
 gpr <-ext(-106.5255, -106.521, 35.856, 35.8594)
 dswe_crop <-crop(dswe_raw, gpr)
@@ -144,7 +133,7 @@ cell_number
 # define neighboring cells by number and create a vector
 neighbor_cells <-c(adjacent(dswe_raw, cells = cell_number, directions ="8"))
 
-# add orginal cell back to vector
+# add original cell back to vector
 cell_vector <-c(cell_number, neighbor_cells)
 
 # extract using that vector

@@ -105,95 +105,17 @@ p4_01 <-as.numeric(quantile(p4_df$lyr.1, c(.01)))
 
 
 ## create dataframe
-stats <-data.frame("name" = c("pair1", "pair2", "cum"),
-          "mean" = c(pair1_mean, pair2_mean, cum_mean),
-           "99" = c(p1_99, p2_99, cum_99),
-           ".01" = c(p1_01, p2_01, cum_01),
-           "sd" = c(pair1_sd, pair2_sd, cum_sd))
+stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
+          "mean" = c(p1_mean, p2_mean, p3_mean, p4_mean),
+           "p99" = c(p1_99, p2_99, p3_99, p4_99),
+           "p1" = c(p1_01, p2_01, p3_01, p4_01),
+           "sd" = c(p1_sd, p2_sd, p3_sd, p4_sd))
 
-p1_df <-as.data.frame(pair1)
-quantile(df$lyr.1, c(.01, .99)) 
-
-# hh
-hh_list <-list.files(pattern = "*HH_01.unw*")
-hh <-rast(hh_list[1])
-values(hh)[values(hh) == 0] <-NA
-plot(hh)
-hh_freq <-as.data.frame(freq(hh, digits = 3))
-hh_pixels <-sum(hh_freq$count)
-hh_perc_lost <-100-(hh_pixels/total_pixels)*100
-
-# hv
-hv_list <-list.files(pattern = "*HV_01.unw*")
-hv <-rast(hv_list[1])
-values(hv)[values(hv) == 0] <-NA
-plot(hv)
-hv_freq <-as.data.frame(freq(hv, digits = 3))
-hv_pixels <-sum(hv_freq$count)
-hv_perc_lost <-100-(hv_pixels/total_pixels)*100
-
-# vh
-vh_list <-list.files(pattern = "*VH_01.unw*")
-vh <-rast(vh_list[1])
-values(vh)[values(vh) == 0] <-NA
-plot(vh)
-vh_freq <-as.data.frame(freq(vh, digits = 3))
-vh_pixels <-sum(vh_freq$count)
-vh_perc_lost <-100-(vh_pixels/total_pixels)*100
+stats # check
+write.csv(stats, "/Users/jacktarricone/ch1_jemez_data/swe_change_stats.csv")
 
 
-# vv
-vv_list <-list.files(pattern = "*VV_01.unw*")
-vv <-rast(vv_list[1])
-values(vv)[values(vv) == 0] <-NA
-plot(vv)
-vv_freq <-as.data.frame(freq(vv, digits = 3))
-vv_pixels <-sum(vv_freq$count)
-vv_perc_lost <-100-(vv_pixels/total_pixels)*100
-
-## bring in vallee grand wkt
-vg <-vect("/Users/jacktarricone/ch1_jemez_data/vector_data/valle_grande_aoi.geojson")
-
-hh_list <-list.files(pattern = "*HH_01.cor*")
-hh_cor <-rast(hh_list[1])
-hh_cor_vg_v1 <-mask(hh_cor, vg)
-hh_cor_vg <-crop(hh_cor_vg_v1, vg)
-plot(hh_cor_vg)
-fr_vg <-as.data.frame(freq(hh_cor_vg, digits = 3))
-total_pixels_vg <-sum(fr_vg$count)
 
 
-# hh
-hh_vg_v1 <-mask(hh, vg)
-hh_vg <-crop(hh_vg_v1, vg)
-plot(hh_vg)
-hh_vg_freq <-as.data.frame(freq(hh_vg, digits = 3))
-hh_vg_pixels <-sum(hh_vg_freq$count)
-hh_perc_lost_vg <-100-(hh_vg_pixels/total_pixels_vg)*100
 
-
-# hv
-hv_vg_v1 <-mask(hv, vg)
-hv_vg <-crop(hv_vg_v1, vg)
-plot(hv_vg)
-hv_vg_freq <-as.data.frame(freq(hv_vg, digits = 3))
-hv_vg_pixels <-sum(hv_vg_freq$count)
-hv_perc_lost_vg <-100-(hv_vg_pixels/total_pixels_vg)*100
-
-# vh
-vh_vg_v1 <-mask(vh, vg)
-vh_vg <-crop(vh_vg_v1, vg)
-plot(vh_vg)
-vh_vg_freq <-as.data.frame(freq(vh_vg, digits = 3))
-vh_vg_pixels <-sum(vh_vg_freq$count)
-vh_perc_lost_vg <-100-(vh_vg_pixels/total_pixels_vg)*100
-
-
-# vv
-vv_vg_v1 <-mask(vv, vg)
-vv_vg <-crop(vv_vg_v1, vg)
-plot(vv_vg)
-vv_vg_freq <-as.data.frame(freq(vv_vg, digits = 3))
-vv_vg_pixels <-sum(vv_vg_freq$count)
-vv_perc_lost_vg <-100-(vv_vg_pixels/total_pixels_vg)*100
 
