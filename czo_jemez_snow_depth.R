@@ -95,14 +95,17 @@ flight1 <-as.numeric(insar$date_time[9]) # row for correct date time
 flight2 <-as.numeric(insar$date_time[178])
 flight3 <-as.numeric(insar$date_time[345])
 
+# fine storm start and end
+storm_start <-insar$date_time[240]
+storm_end <-insar$date_time[270]
+
 # plot
 ggplot(insar)+
   geom_vline(xintercept = flight1, linetype=3, col = "red", alpha = .7) +
   geom_vline(xintercept = flight2, linetype=3, col = "red", alpha = .7) +
   geom_vline(xintercept = flight3, linetype=3, col = "red", alpha = .7) +
-  #annotate("rect", xmin = as.numeric(flight1), xmax = as.numeric(flight1), 
-   
-  #        ymin = -Inf, ymax = Inf, alpha = .2)+
+  annotate("rect", xmin = storm_start, xmax = storm_end,
+    ymin = -Inf, ymax = Inf, alpha = .2)+
   geom_line(aes(x = date_time, y = DSDepth_1, col = "1"), size = .5)+
   geom_line(aes(x = date_time, y = DSDepth_3, col = "3"), size = .5)+
   geom_line(aes(x = date_time, y = DSDepth_4, col = "4"), size = .5)+
@@ -133,8 +136,48 @@ ggsave(file = "czo_jemez_depth_v3.png",
        height = 3,
        dpi = 400)
 
-################
+#######################################################
+###### changes in depth during insar periods ##########
+#######################################################
 
+### pair 1
+# define flight dates and times
+# [9] flight 1
+# [178] flight 2
+# [345] flight 3
 
+cols_string <-c("DSDepth_1", "DSDepth_3", "DSDepth_4", "DSDepth_6", "DSDepth_7",
+                "DSDepth_9", "vg_snow_depth_cm", "hv_snow_depth_cm")
 
+##### function for pair 1 depth change
+dswe_pair1 <-function(x){
+  change <-x[178]-x[9]
+  return(change)
+}
 
+pair1 <- apply(insar[,cols_string], 2, dswe_pair1)  # Apply function to specific columns
+pair1
+
+##### pair 2
+dswe_pair2 <-function(x){
+  change <-x[345]- x[178]
+  return(change)
+}
+
+pair2 <- apply(insar[,cols_string], 2, dswe_pair2)  # Apply function to specific columns
+pair2                                      # Print matrix containing updated values
+
+##### pair 2
+dswe_pair3 <-function(x){
+  change <-x[345]- x[9]
+  return(change)
+}
+
+pair3 <- apply(insar[,cols_string], 2, dswe_pair3)  # Apply function to specific columns
+pair3 
+
+# define row names
+dates <-c("feb12_19","feb19_26","feb12_26")
+results <-as.data.frame(rbind(pair1,pair2,pair3))
+results_v2 <-cbind(dates,results)
+print(results_v2)
