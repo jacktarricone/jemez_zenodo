@@ -22,7 +22,7 @@ sources(stack) # check paths
 # bring in swe change data
 sensor_csv <-read.csv("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_depth_change.csv")
 sensor_locations <-vect(sensor_csv, geom = c("x","y"), crs = crs(stack))
-points(sensor_locations, cex = 1)
+plot(sensor_locations)
 
 # bring snow depth sensor locations shapefile for cropping
 loc_raw <-vect("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
@@ -80,17 +80,65 @@ sensor_csv_v2$feb19_26_dswe <-sensor_csv_v2$feb19_26*.2
 sensor_csv_v2$feb12_26_dswe <-sensor_csv_v2$feb12_26*.2
 sensor_csv_v2
 
+#write.csv(sensor_csv_v2, "/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_insar_swe_change.csv")
+
+#### format df for plotting and anlysis
+
+# repeat dates so they can be grouped by
+first <-rep(names(sensor_csv_v2[4]), length = nrow(sensor_csv)) 
+second <-rep(names(sensor_csv_v2[5]), length = nrow(sensor_csv)) 
+third <-rep(names(sensor_csv_v2[6]), length = nrow(sensor_csv))
+date <-c(first,second,third,third) # make vector
+
+# repeat meta data
+meta <-rbind(sensor_csv_v2[1:3],sensor_csv_v2[1:3],sensor_csv_v2[1:3],sensor_csv_v2[1:3])
+
+# bind date vector
+add_date <-cbind(meta, date)
+add_date
+
+# make swe data column in proper order
+insar_dswe <-c(sensor_csv_v2$insar_feb12_19_dswe,
+               sensor_csv_v2$insar_feb19_26_dswe,
+               sensor_csv_v2$insar_feb12_26_dswe,
+               sensor_csv_v2$insar_feb12_26_cm_dswe)
+
+# make insitu column
+insitu_dswe <-c(sensor_csv_v2$feb12_19_dswe,
+                sensor_csv_v2$feb19_26_dswe,
+                sensor_csv_v2$feb12_26_dswe,
+                sensor_csv_v2$feb12_26_dswe)
+
+# bind together
+plotting_df <-cbind(add_date,insar_dswe,insitu_dswe)
+head(plotting_df)
+
+
+
+# lm_eqn <- function(df){
+#   m <- lm(y ~ x, df);
+#   eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
+#                    list(a = format(unname(coef(m)[1]), digits = 2),
+#                         b = format(unname(coef(m)[2]), digits = 2),
+#                         r2 = format(summary(m)$r.squared, digits = 3)))
+#   as.character(as.expression(eq));
+# }
+# 
+# p1 <- p + geom_text(x = 25, y = 300, label = lm_eqn(df), parse = TRUE)
+
 
 ## plot
 ggplot(sensor_csv_v2) +
   geom_vline(xintercept = 0, linetype=1, col = "black", alpha = 1) +
   geom_hline(yintercept = 0, linetype=1, col = "black", alpha = 1) +
+  geom_abline(intercept = 0, slope = 1, linetype = 2) +
   geom_point(aes(x = feb12_19_dswe, y = insar_feb12_19_dswe, col = "pair1")) +
   geom_point(aes(x = feb19_26_dswe, y = insar_feb19_26_dswe, col = "pair2")) +
   geom_point(aes(x = feb12_26_dswe, y = insar_feb12_26_dswe, col = "pair3")) +
   geom_point(aes(x = feb12_26_dswe, y = insar_feb12_26_cm_dswe, col = "pair4")) +
-  scale_y_continuous(limits = c(-4,4),breaks = c(seq(-4,4,2))) +
-  scale_x_continuous(limits = c(-4,4),breaks = c(seq(-4,4,2))) +
+  #geom_smooth() +
+  scale_y_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
+  scale_x_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
   ylab(Delta~"SWE InSAR [cm]") + xlab(Delta~"SWE In situ [cm]") +
   scale_color_manual(name = "Date",
                      values = c('pair1' = 'darkgreen', 'pair2' = 'plum', 
@@ -98,7 +146,7 @@ ggplot(sensor_csv_v2) +
                      labels = c('pair1' = 'Feb 12-19', 'pair2' = 'Feb 19-26', 
                                 'pair3' = 'Feb 12-26', 'pair4' = 'Feb 12-26 CM'))
 
-
+?geom_smooth
 
 # mean of 9 swe changes around
 mean_pit_dswe <-mean(nine_cell_dswe[1:9,1])
