@@ -65,11 +65,40 @@ feb12_26_cm_dswe <-terra::extract(feb12_26_cm, sensor_locations,  cells = TRUE, 
 colnames(feb12_26_cm_dswe)[2] <-"insar_feb12_26_cm_dswe"
 feb12_26_cm_dswe
 
+# create new df
+sensor_csv_v2 <-cbind(sensor_csv, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
+                      feb12_26_dswe$insar_feb12_26_dswe, feb12_26_cm_dswe$insar_feb12_26_cm_dswe)
+
+# rename binded colums
+names(sensor_csv_v2)[7:10] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe","insar_feb12_26_cm_dswe")
+sensor_csv_v2
+
+#### testing this
+#### convert depth to SWE
+sensor_csv_v2$feb12_19_dswe <-sensor_csv_v2$feb12_19*.2
+sensor_csv_v2$feb19_26_dswe <-sensor_csv_v2$feb19_26*.2
+sensor_csv_v2$feb12_26_dswe <-sensor_csv_v2$feb12_26*.2
+sensor_csv_v2
 
 
+## plot
+ggplot(sensor_csv_v2) +
+  geom_vline(xintercept = 0, linetype=1, col = "black", alpha = 1) +
+  geom_hline(yintercept = 0, linetype=1, col = "black", alpha = 1) +
+  geom_point(aes(x = feb12_19_dswe, y = insar_feb12_19_dswe, col = "pair1")) +
+  geom_point(aes(x = feb19_26_dswe, y = insar_feb19_26_dswe, col = "pair2")) +
+  geom_point(aes(x = feb12_26_dswe, y = insar_feb12_26_dswe, col = "pair3")) +
+  geom_point(aes(x = feb12_26_dswe, y = insar_feb12_26_cm_dswe, col = "pair4")) +
+  scale_y_continuous(limits = c(-4,4),breaks = c(seq(-4,4,2))) +
+  scale_x_continuous(limits = c(-4,4),breaks = c(seq(-4,4,2))) +
+  ylab(Delta~"SWE InSAR [cm]") + xlab(Delta~"SWE In situ [cm]") +
+  scale_color_manual(name = "Date",
+                     values = c('pair1' = 'darkgreen', 'pair2' = 'plum', 
+                                'pair3' = 'goldenrod', 'pair4' = 'firebrick'),
+                     labels = c('pair1' = 'Feb 12-19', 'pair2' = 'Feb 19-26', 
+                                'pair3' = 'Feb 12-26', 'pair4' = 'Feb 12-26 CM'))
 
-# bind
-sensor_csv$insar_feb12_19_swe <-cbind(sensor_csv, feb12_19_dswe$insar_feb12_19_dswe)
+
 
 # mean of 9 swe changes around
 mean_pit_dswe <-mean(nine_cell_dswe[1:9,1])
