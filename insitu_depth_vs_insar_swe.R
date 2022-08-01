@@ -75,9 +75,21 @@ sensor_csv_v2
 
 #### testing this
 #### convert depth to SWE
-sensor_csv_v2$feb12_19_dswe <-sensor_csv_v2$feb12_19*.2
-sensor_csv_v2$feb19_26_dswe <-sensor_csv_v2$feb19_26*.2
-sensor_csv_v2$feb12_26_dswe <-sensor_csv_v2$feb12_26*.2
+
+# read in pit data
+pit_info <-read.csv("/Users/jacktarricone/ch1_jemez_data/pit_data/perm_pits.csv")
+pit_info
+
+# calc bulk density, doesn't vary much
+# this value will be used for the first pair because there was no new snow
+bulk_density <-mean(pit_info$mean_density[6:7])/1000
+
+# calc SWE change
+sensor_csv_v2$feb12_19_dswe <-sensor_csv_v2$feb12_19*bulk_density
+
+# for the second pair 
+sensor_csv_v2$feb19_26_dswe <-sensor_csv_v2$feb19_26*.15
+sensor_csv_v2$feb12_26_dswe <-sensor_csv_v2$feb12_26*.15
 sensor_csv_v2
 
 #write.csv(sensor_csv_v2, "/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_insar_swe_change.csv")
@@ -88,7 +100,8 @@ sensor_csv_v2
 first <-rep(names(sensor_csv_v2[4]), length = nrow(sensor_csv)) 
 second <-rep(names(sensor_csv_v2[5]), length = nrow(sensor_csv)) 
 third <-rep(names(sensor_csv_v2[6]), length = nrow(sensor_csv))
-date <-c(first,second,third,third) # make vector
+fourth <-rep("feb12_26_cm",8)
+date <-c(first, second, third, fourth) # make vector
 
 # repeat meta data
 meta <-rbind(sensor_csv_v2[1:3],sensor_csv_v2[1:3],sensor_csv_v2[1:3],sensor_csv_v2[1:3])
@@ -112,22 +125,49 @@ insitu_dswe <-c(sensor_csv_v2$feb12_19_dswe,
 # bind together
 plotting_df <-cbind(add_date,insar_dswe,insitu_dswe)
 head(plotting_df)
+# write.csv(plotting_df, "/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_insar_swe_change_plotting_df.csv")
 
 
+## new plot
+my_colors <-c('darkgreen', 'plum', 'goldenrod',  'firebrick')
 
-# lm_eqn <- function(df){
-#   m <- lm(y ~ x, df);
-#   eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
-#                    list(a = format(unname(coef(m)[1]), digits = 2),
-#                         b = format(unname(coef(m)[2]), digits = 2),
-#                         r2 = format(summary(m)$r.squared, digits = 3)))
-#   as.character(as.expression(eq));
-# }
-# 
-# p1 <- p + geom_text(x = 25, y = 300, label = lm_eqn(df), parse = TRUE)
+# create new df for lm and plotting on graph
+lm_df <-plotting_df[-c(1:4)]
+names(lm_df)[1:2] <-c("x","y")
+
+#shapiro.test(plotting_df$insar_dswe)
+#shapiro.test(plotting_df$insitu_dswe)
+
+# function for running lm, plotting equation and r2 
+lm_eqn <- function(df){
+  m <- lm(y ~ x, df);
+  eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2,
+                   list(a = format(unname(coef(m)[1]), digits = 2),
+                        b = format(unname(coef(m)[2]), digits = 2),
+                        r2 = format(summary(m)$r.squared, digits = 3)))
+  as.character(as.expression(eq));
+}
+
+ggplot(plotting_df, aes(insitu_dswe, insar_dswe)) +
+  geom_smooth(method = "lm", se = FALSE)+
+  geom_point(aes(color = date)) +
+  geom_vline(xintercept = 0, linetype=1, col = "black", alpha = 1) +
+  geom_hline(yintercept = 0, linetype=1, col = "black", alpha = 1) +
+  geom_abline(intercept = 0, slope = 1, linetype = 2) +
+  scale_y_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
+  scale_x_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
+  ylab(Delta~"SWE InSAR [cm]") + xlab(Delta~"SWE In situ [cm]") +
+  scale_color_manual(name = "Date Range",
+                     values = my_colors,
+                     labels = c('Feb 12-19', 'Feb 19-26', 
+                                'Feb 12-26', 'Feb 12-26 CM'))+
+  theme(legend.position = c(.85,.25))
+
+p1 <- p + geom_text(x = -4, y = 6, label = lm_eqn(lm_df), parse = TRUE)
+print(p1)
 
 
-## plot
+## plot old way to checking purposes
 ggplot(sensor_csv_v2) +
   geom_vline(xintercept = 0, linetype=1, col = "black", alpha = 1) +
   geom_hline(yintercept = 0, linetype=1, col = "black", alpha = 1) +
