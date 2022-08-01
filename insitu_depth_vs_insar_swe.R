@@ -28,41 +28,48 @@ points(sensor_locations, cex = 1)
 loc_raw <-vect("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
 locations <-project(loc_raw, crs(stack))
 
-# crop swe change stack
+# crop swe change stack, just for visualization purposes
 ext(locations) # get extent
 shp_ext <-ext(-106.5342, -106.5335, 35.8837, 35.8842) # make a bit bigger for plotting
 stack_crop <-crop(stack, shp_ext)
 plot(stack_crop[[4]])
 points(sensor_locations, cex = 1)
 
-# read in the four rasters from list
-feb12_19 <-stack_crop[[1]]
-feb12_26_cm <-stack_crop[[2]]
-feb12_26 <-stack_crop[[3]]
-feb19_26 <-stack_crop[[4]]
-
-plot(feb12_19) # test plot
-plot(points$geometry[1:6], add = TRUE)
+# rasters from orginal stack
+feb12_19 <-stack[[1]]
+feb12_26_cm <-stack[[2]]
+feb12_26 <-stack[[3]]
+feb19_26 <-stack[[4]]
 
 ###########################
 ### compare insitu depth change to insar swe change
 ###########################
 
-## feb 12-29
-# extract cell number from pit lat/lon point
-feb12_19_cells <-cells(feb12_19, points$geometry)
-cell_number <-pit_cell_v1[1,2]
-cell_number
+## feb 12-19
+feb12_19_dswe <-terra::extract(feb12_19, sensor_locations,  cells = TRUE, xy = TRUE)
+colnames(feb12_19_dswe)[2] <-"insar_feb12_19_dswe"
+feb12_19_dswe
 
-# define neighboring cells by number and create a vector
-neighbor_cells <-c(adjacent(dswe_raw, cells = cell_number, directions ="8"))
+## feb 19-26
+feb19_26_dswe <-terra::extract(feb19_26, sensor_locations,  cells = TRUE, xy = TRUE)
+colnames(feb19_26_dswe)[2] <-"insar_feb19_26_dswe"
+feb19_26_dswe
 
-# add orginal cell back to vector
-cell_vector <-c(cell_number, neighbor_cells)
+## feb 12-26
+feb12_26_dswe <-terra::extract(feb12_26, sensor_locations,  cells = TRUE, xy = TRUE)
+colnames(feb12_26_dswe)[2] <-"insar_feb12_26_dswe"
+feb12_26_dswe
 
-# extract using that vector
-nine_cell_dswe <-terra::extract(dswe_raw, cell_vector,  cells = TRUE, xy = TRUE)
-nine_cell_dswe
+## feb 12-26 cumulative
+feb12_26_cm_dswe <-terra::extract(feb12_26_cm, sensor_locations,  cells = TRUE, xy = TRUE)
+colnames(feb12_26_cm_dswe)[2] <-"insar_feb12_26_cm_dswe"
+feb12_26_cm_dswe
+
+
+
+
+# bind
+sensor_csv$insar_feb12_19_swe <-cbind(sensor_csv, feb12_19_dswe$insar_feb12_19_dswe)
 
 # mean of 9 swe changes around
 mean_pit_dswe <-mean(nine_cell_dswe[1:9,1])
