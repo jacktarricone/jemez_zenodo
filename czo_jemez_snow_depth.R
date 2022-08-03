@@ -131,7 +131,7 @@ ggplot(insar)+
 
 
 setwd("/Users/jacktarricone/ch1_jemez_data/plots")
-ggsave(file = "czo_jemez_depth_v3.png",
+ggsave(file = "czo_jemez_depth_v4.png",
        width = 7,
        height = 3,
        dpi = 400)
@@ -181,3 +181,5 @@ dates <-c("feb12_19","feb19_26","feb12_26")
 results <-as.data.frame(rbind(pair1,pair2,pair3))
 results_v2 <-cbind(dates,results)
 print(results_v2)
+
+write.csv(results_v2, "/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_depth_change.csv")

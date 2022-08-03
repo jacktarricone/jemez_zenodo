@@ -174,7 +174,7 @@ p <-ggplot(plotting_df, aes(insitu_dswe, insar_dswe)) +
                      labels = c('Feb 12-19', 'Feb 19-26',
                                 'Feb 12-26', 'Feb 12-26 CM'))+
   scale_fill_discrete(breaks=c('B', 'C', 'A'))+
-  theme(legend.position = c(.85,.25))
+  
 
 p1 <- p + geom_text(x = -3.28, y = 5, label = lm_eqn(lm_df), parse = TRUE)
 print(p1)
