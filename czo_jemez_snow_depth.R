@@ -101,9 +101,9 @@ storm_end <-insar$date_time[270]
 
 # plot
 ggplot(insar)+
-  geom_vline(xintercept = flight1, linetype=3, col = "red", alpha = .7) +
-  geom_vline(xintercept = flight2, linetype=3, col = "red", alpha = .7) +
-  geom_vline(xintercept = flight3, linetype=3, col = "red", alpha = .7) +
+  geom_vline(xintercept = flight1, linetype=3, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight2, linetype=3, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight3, linetype=3, col = "black", alpha = .7) +
   annotate("rect", xmin = storm_start, xmax = storm_end,
     ymin = -Inf, ymax = Inf, alpha = .2)+
   geom_line(aes(x = date_time, y = DSDepth_1, col = "1"), size = .5)+
@@ -112,27 +112,27 @@ ggplot(insar)+
   geom_line(aes(x = date_time, y = DSDepth_6, col = "6"), size = .5)+
   geom_line(aes(x = date_time, y = DSDepth_7, col = "7"), size = .5)+
   geom_line(aes(x = date_time, y = DSDepth_9, col = "9"), size = .5)+
-  geom_line(aes(x = date_time, y = vg_snow_depth_cm, col = "10"), size = .5)+
-  geom_line(aes(x = date_time, y = hv_snow_depth_cm, col = "12"), size = .5)+
+  geom_line(aes(x = date_time, y = vg_snow_depth_cm, col = "10"), size = 1)+
+  #geom_line(aes(x = date_time, y = hv_snow_depth_cm, col = "12"), size = .5)+
   scale_y_continuous(limits = c(50,120),breaks = c(seq(50,120,10)))+
   ylab("Depth (cm)") + xlab("Date") +
   scale_color_manual(name = "Sensor",
                      values = c('1' = 'darkgreen', '3' = 'plum', 
                                 '4' = 'goldenrod', '6' = 'firebrick', 
                                 '7' = 'darkorange','9'='aquamarine',
-                                '10' = 'red','12'='darkblue'),
-                     labels = c('1' = 'DSDepth_1', '3' = 'DSDepth_3', 
-                                '4' = 'DSDepth_4', '6' = 'DSDepth_6', 
-                                '7' = 'DSDepth_7', '9' = 'DSDepth_9',
-                                '10' = 'VG','12'='HV'))+
+                                '10' = 'red'),
+                     labels = c('1' = 'DS_1', '3' = 'DS_3', 
+                                '4' = 'DS_4', '6' = 'DS_6', 
+                                '7' = 'DS_7', '9' = 'DS_9',
+                                '10' = 'VG'))+
   scale_x_datetime(breaks = "2 day", 
                    date_labels="%b %d", 
                    limits = ymd_hms(c("2020-02-12 01:00:00", "2020-02-26 19:00:00"), tz = "MST"))
 
 
 setwd("/Users/jacktarricone/ch1_jemez_data/plots")
-ggsave(file = "czo_jemez_depth_v4.png",
-       width = 7,
+ggsave(file = "czo_jemez_depth_v6.png",
+       width = 6,
        height = 3,
        dpi = 400)
 

@@ -82,8 +82,8 @@ ggplot()+
 
 setwd("/Users/jacktarricone/ch1_jemez_data/plots")
 ggsave("dswe_hist_new.png",
-       width = 5, 
-       height = 3,
+       width = 6, 
+       height = 4,
        units = "in",
        dpi = 300)
 
