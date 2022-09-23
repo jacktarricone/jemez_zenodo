@@ -117,15 +117,15 @@ head(snow_df)
 # save the data frame for making more plots in the future
 #fwrite(no_snow_unw_plv_df, "/Volumes/JT/projects/uavsar/jemez/look_vector/no_snow_unw_plv_df.csv")
 
-
+?lm
 # run linear model to plot trend line
-lm_fit <-lm(no_snow_unw_plv_df$unwrapped_phase ~ no_snow_unw_plv_df$plv_km)
+lm_fit <-lm(snow_df$unwrapped_phase ~ snow_df$plv_km)
 summary(lm_fit)
 
-
 # create new df for lm and plotting on graph
+head(snow_df)
 lm_df <-snow_df[-c(1:3)]
-names(lm_df)[1:2] <-c("x","y")
+names(lm_df)[1:2] <-c("y","x")
 head(lm_df)
 
 #shapiro.test(plotting_df$insar_dswe)
@@ -150,31 +150,36 @@ p12 <-ggplot(snow_df, aes(plv_km, unwrapped_phase)) +
   geom_hex(bins = 25) +
   scale_fill_gradient(low = "white", high = "seagreen") +
   #stat_smooth_func2(geom="text",method="lm",hjust=0,parse=TRUE) +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_smooth(method = "lm", color = "black", se = FALSE) +
   #geom_abline(slope = coef(lm_fit)[[2]], intercept = coef(lm_fit)[[1]], size = 1)+
   scale_y_continuous(breaks = seq(-5,15,5))+
   scale_x_continuous(breaks = seq(10,30,5))+
   labs(#title = "Jemez Radar Path Length vs. Unwrapped Phase 2/12-2/19",
        x = "PLV (km)",
        y = "Unwrapped Phase (radians)")+
-  theme(axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank())
+  theme(legend.position = c(.85, .2),
+        legend.key.size = unit(.5, 'cm'))
 
-p_text <- p12 + geom_text(x = -15, y = 0, label = lm_eqn(lm_df), parse = TRUE)
-print(p_text)
+print(p12)
 
-# ggsave(p12,
-#         file = "no_snow_plv_vs_unw.png",
-#         width = 6, 
-#         height = 4,
-#         dpi = 400)
+# print(p12)
+# label <-lm_eqn(lm_df)
+# p_text <- p12 + geom_text(x = 15, y = 8, label = label, parse = TRUE)
+# print(p_text)
+
+# save
+ggsave(p12,
+       file = "/Users/jacktarricone/ch1_jemez_data/plots/snow_plv_vs_unw_v2.png",
+       width = 5,
+       height = 5,
+       dpi = 400)
 
 
 ### correct unw data using path length and the linear estimation we generated
 
-path_length_correction <-function(unw, plv){return((unw - ((plv * coef(lm_fit)[[2]]) + coef(lm_fit)[[1]])))}
+path_length_correction <-function(unw, plv){
+  return((unw - ((plv * coef(lm_fit)[[2]]) + coef(lm_fit)[[1]])))
+  }
 unw_corrected <-path_length_correction(unw_masked, plv_masked)
 plot(unw_corrected)
 
