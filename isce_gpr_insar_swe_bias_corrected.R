@@ -4,7 +4,6 @@
 # updating my old code with the new feb12-26 bias corrected raster ryan sent me
 # and new isce generated 12-26 interferogram
 
-
 library(terra)
 library(ggplot2);theme_set(theme_classic(12))
 library(dplyr)
@@ -76,15 +75,15 @@ hist(plotting_df$dswe_insar_cm, breaks = 20)
 # scattter
 #theme_set(theme_light(11)) # set theme
 
-ggplot(cm_plotting_df) +
+ggplot(plotting_df) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   ylim(c(-10,10)) + xlim(c(-10,10))+
   geom_point(aes(y = dswe_insar_isce, x = dswe_gpr, color = "isce"), alpha = .5) +
   geom_point(aes(y = dswe_insar_cm, x = dswe_gpr, color = "cm"), alpha = .5) +
-  scale_color_manual(name = "Feb 12-26 InSAR Data",
+  scale_color_manual(name = "InSAR Pairs",
                      values = c('isce' = 'darkred', 'cm' = 'goldenrod'),
-                     labels = c('ISCE', 'Cumulative'))+
+                     labels = c('12-26 Feb.', '12-26 Feb. Cumulative'))+
   labs(x = Delta~"SWE GPR [cm]",
        y = Delta~"SWE InSAR [cm]")+
   theme(legend.position = c(.78,.80))
@@ -108,14 +107,14 @@ ggplot(cm_plotting_df) +
 # p1 <- p + geom_text(x = -5, y = 9, label = lm_eqn(lm_df), parse = TRUE)
 # print(p1)
 
-ggsave("/Users/jacktarricone/ch1_jemez_data/plots/dswe_gpr_vs_insar_feb26_12_bias_v7.png",
+ggsave("/Users/jacktarricone/ch1_jemez_data/plots/fig10.pdf",
        width = 5, 
        height = 5,
        units = "in",
        dpi = 400)
 
 # density scatter
-ggplot(cm_plotting_df, aes(y = dswe_insar, x = dswe_gpr)) +
+ggplot(plotting_df, aes(y = dswe_insar, x = dswe_gpr)) +
   #geom_abline(slope = 1) +
   xlim(c(-2,2)) + ylim(c(-2,2))+
   stat_density_2d(aes(fill = ..level..), geom = "polygon", contour_var = "count")+
