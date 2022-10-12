@@ -80,11 +80,15 @@ plot(plv_masked, add = TRUE)
 # we do this because we're assuming there is some snow signal combine with atm signal in no pixels
 # by doing just these, in theory we're just focusing on the atmospheric protion
 
-no_snow_mask <-rast("landsat_fsca_2-18.tif")
-plot(no_snow_mask, add = TRUE)
+#############################################
+############ for snow covered pixels ########
+#############################################
+
+fsca <-rast("landsat_fsca_2-18.tif")
+plot(fsca)
 
 # clip edges off no snow mask to make it same size as plv and unw
-clipped_nsm <-mask(no_snow_mask, unw_masked, maskvalue = NA)
+clipped_nsm <-mask(fsca, unw_masked, maskvalue = NA)
 plot(clipped_nsm, add = TRUE)
 
 # snow unw
@@ -102,13 +106,13 @@ colnames(unw_df)[4] <- "unwrapped_phase"
 head(unw_df)
 hist(unw_df$unwrapped_phase, breaks = 100) #quick hist to check
 
-#plv
+# plv
 plv_df <-as.data.frame(snow_plv, xy=TRUE, cells=TRUE, na.rm=TRUE)
 colnames(plv_df)[4] <- "plv_km"
 head(plv_df)
 hist(plv_df$plv_km, breaks = 100) #quick hist to check
 
-#bind last column on for future plot
+# bind last column on for future plot
 snow_df <-cbind(unw_df, plv_df$plv_km)
 colnames(snow_df)[5] <- "plv_km"
 head(snow_df)
@@ -122,9 +126,6 @@ head(snow_df)
 lm_df <-snow_df[-c(1:3)]
 names(lm_df)[1:2] <-c("y","x")
 head(lm_df)
-
-#shapiro.test(plotting_df$insar_dswe)
-#shapiro.test(plotting_df$insitu_dswe)
 
 # function for running lm, plotting equation and r2 
 lm_eqn <- function(df){
@@ -140,35 +141,116 @@ lm_eqn <- function(df){
 eq_label <-lm_eqn(lm_df)
 print(eq_label)
 
-########################################
-########### unw vs plv #################
-########################################
+## plot 
 
 p12 <-ggplot(snow_df, aes(plv_km, unwrapped_phase)) +
   geom_hex(bins = 25) +
-  scale_fill_gradient(low = "white", high = "seagreen") +
+  scale_fill_gradient(low = "white", high = "darkseagreen") +
   geom_smooth(method = "lm", color = "black", se = FALSE) +
   annotate("text", x = 14, y = 4, parse = TRUE,
            label = "italic(y) == \"-4.3\" + \"0.26\" %.% italic(x) * \",\" ~ ~italic(r)^2 ~ \"=\" ~ \"0.81\"") +
   ylim(-5,5) + xlim(10,30)+
   labs(#title = "Jemez Radar Path Length vs. Unwrapped Phase 2/12-2/19",
-       x = "PLV (km)",
-       y = "Unwrapped Phase (radians)")+
+    x = "PLV (km)",
+    y = "Unwrapped Phase (radians)")+
   theme(legend.position = c(.85, .30),
         legend.key.size = unit(.5, 'cm'))
 
 print(p12)
 
-# print(p12)
-# label <-lm_eqn(lm_df)
-# p_text <- p12 + geom_text(x = 15, y = 8, label = label, parse = TRUE)
-# print(p_text)
+
+
+
+
+
+
+#############################################
+############ for NO snow  pixels ########
+#############################################
+
+# create snow snow mask
+no_snow <-fsca
+values(no_snow)[is.na(no_snow[])] = -999
+values(no_snow)[values(no_snow) > 0] = 1
+no_snow_crop <-mask(no_snow, cor, maskvalue = NA)
+plot(no_snow_crop)
+
+# clip edges off no snow mask to make it same size as plv and unw
+clipped_nsm_v2 <-mask(no_snow_crop, unw_masked, maskvalue = NA)
+plot(clipped_nsm_v2)
+
+# no snow unw
+no_snow_unw <-mask(unw_masked, clipped_nsm_v2, maskvalue = 1)
+plot(no_snow_unw)
+
+# no snow plv
+no_snow_plv <-mask(plv_masked, clipped_nsm_v2, maskvalue = 1)
+plot(no_snow_plv)
+
+### convert no snow plv and unw rasters to dataframes, rename data columns
+# unw
+no_unw_df <-as.data.frame(no_snow_unw, xy=TRUE, cells=TRUE, na.rm=TRUE)
+colnames(no_unw_df)[4] <- "unwrapped_phase"
+head(no_unw_df)
+hist(no_unw_df$unwrapped_phase, breaks = 100) #quick hist to check
+
+#plv
+no_plv_df <-as.data.frame(no_snow_plv, xy=TRUE, cells=TRUE, na.rm=TRUE)
+colnames(no_plv_df)[4] <- "plv_km"
+head(no_plv_df)
+hist(no_plv_df$plv_km, breaks = 100) #quick hist to check
+
+#bind last column on for future plot
+no_snow_df <-cbind(no_unw_df, no_plv_df$plv_km)
+colnames(no_snow_df)[5] <- "plv_km"
+head(no_snow_df)
+
+# run linear model to plot trend line
+lm_fit_v2 <-lm(no_snow_df$unwrapped_phase ~ no_snow_df$plv_km)
+summary(lm_fit_v2)
+
+# create new df for lm and plotting on graph
+head(no_snow_df)
+lm_df_v2 <-no_snow_df[-c(1:3)]
+names(lm_df_v2)[1:2] <-c("y","x")
+head(lm_df_v2)
+
+# create eq
+eq_label_v2 <-lm_eqn(lm_df_v2)
+print(eq_label_v2)
+
+
+########################################
+########### no snow unw vs plv ############
+########################################
+
+p13 <-ggplot(no_snow_df, aes(plv_km, unwrapped_phase)) +
+  geom_hex(bins = 25) +
+  scale_fill_gradient(low = "white", high = "darkorchid4") +
+  geom_smooth(method = "lm", color = "black", se = FALSE) +
+  annotate("text", x = 14, y = 4, parse = TRUE,
+           label = "italic(y) == \"-4.5\" + \"0.26\" %.% italic(x) * \",\" ~ ~italic(r)^2 ~ \"=\" ~ \"0.81\"") +
+  ylim(-5,5) + xlim(10,30)+
+  labs(#title = "Jemez Radar Path Length vs. Unwrapped Phase 2/12-2/19",
+    x = "PLV (km)",
+    y = "Unwrapped Phase (radians)")+
+  theme(legend.position = c(.85, .30),
+        legend.key.size = unit(.5, 'cm'))
+
+print(p13)
+
+
+# combine
+figure <- ggarrange(p12, p13, 
+                    labels = c("(a)", "(b)"),
+                    ncol = 1, nrow = 2)
+plot(figure)
 
 # save
-ggsave(p12,
-       file = "/Users/jacktarricone/ch1_jemez_data/plots/snow_plv_vs_unw_v3.png",
+ggsave(figure,
+       file = "/Users/jacktarricone/ch1_jemez_data/plots/fig05.pdf",
        width = 6,
-       height = 4,
+       height = 7,
        dpi = 400)
 
 

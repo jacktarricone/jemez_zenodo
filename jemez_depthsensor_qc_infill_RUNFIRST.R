@@ -7,12 +7,17 @@
 
 
 #################################################################################
+#Change these values
+
+site_name = "wrcc"    #site ("SXK" or "SXN")
+wyear = 2020         #water year 
+
+#################################################################################
 #Load packages
 #These must be already installed on your system 
 
 library(ggplot2)  #plotting
-library(dplyr)    #data manipulation
-library(plyr)     #data manipulation
+library(plyr); library(dplyr)
 library(plotly)   #interactive plotting
 library(cowplot)  #publication-ready plots
 library(fda)      #fourier transforms
@@ -61,13 +66,16 @@ depth <-as.data.frame(cbind(as.character(vg_filt$date_time), # as character to m
                                hv_filt$hv_snow_depth_cm))
 
 # transform back to date
-depth$V1 <-ymd_hms(depth_df$V1, tz = "MST")
+depth$V1 <-ymd_hms(depth$V1, tz = "MST")
 
 # rename new cols
-names(depth_df)[1] <- "date_time"
-names(depth_df)[2] <- "DSDepth_1" # vg
-names(depth_df)[3] <- "DSDepth_2" # redondo
-names(depth_df)[4] <- "DSDepth_3" # hv
+names(depth)[1] <- "date_time"
+names(depth)[2] <- "DSDepth_1" # vg
+names(depth)[3] <- "DSDepth_2" # redondo
+names(depth)[4] <- "DSDepth_3" # hv
+
+#change to numeric
+depth[, 2:4] <- sapply(depth[, 2:4], as.numeric)
 
 # check
 head(depth)
@@ -76,8 +84,8 @@ head(depth)
 #Format data
 
 # ddd doy, and dowy info
-depth$doy <- doy_FUN(depth_df$date_time)
-depth$dowy <- dowy_FUN(depth_df$date_time, depth_df$doy)
+depth$doy <- doy_FUN(depth$date_time)
+depth$dowy <- dowy_FUN(depth$date_time, depth$doy)
 
 # unload plyr
 detach("package:plyr", unload=TRUE)
@@ -88,17 +96,17 @@ detach("package:plyr", unload=TRUE)
 #Write function for identifying infill types
 #Assigns the type of infilling to be performed based on gap length
 #Omits any gaps occurring before veg_effect_end and after snow_end_dowy
-w = gap_num
-x = gap_length
-y = TIMESTAMP
-z = dowy
-fun_FILLTYPE <- #Assigns the type of infilling to be performed based on gap length (x)
- function(w,x,y,z){ifelse(w == 1 | z >= snow_end_dowy[i],
-                       "MANUAL",
-                      ifelse(x > 48,
-                            "SPLINE",
-                           ifelse(x <= 48 & x > 3,
-                                 "AVG24",
-                                "INTERP")))}
+# w = gap_num
+# x = gap_length
+# y = date_time
+# z = dowy
+# fun_FILLTYPE <- #Assigns the type of infilling to be performed based on gap length (x)
+#  function(w,x,y,z){ifelse(w == 1 | z >= snow_end_dowy[i],
+#                        "MANUAL",
+#                       ifelse(x > 48,
+#                             "SPLINE",
+#                            ifelse(x <= 48 & x > 3,
+#                                  "AVG24",
+#                                 "INTERP")))}
 
 

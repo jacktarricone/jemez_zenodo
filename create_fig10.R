@@ -71,10 +71,6 @@ hist(plotting_df$dswe_insar_cm, breaks = 20)
 ####
 # plotting
 ####
-
-# scattter
-#theme_set(theme_light(11)) # set theme
-
 ggplot(plotting_df) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
@@ -88,37 +84,13 @@ ggplot(plotting_df) +
        y = Delta~"SWE InSAR [cm]")+
   theme(legend.position = c(.78,.80))
     
-    # panel.grid.major = element_blank(), 
-    #     panel.grid.minor = element_blank(),
-    #     panel.background = element_rect(colour = "black", size=1))
-
-# lm_df <-cm_plotting_df[-c(1:3)]
-# names(lm_df)[1:2] <-c("x","y")
-# 
-# lm_eqn <- function(df){
-#   m <- lm(y ~ x, df);
-#   eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
-#                    list(a = format(unname(coef(m)[1]), digits = 2),
-#                         b = format(unname(coef(m)[2]), digits = 2),
-#                         r2 = format(summary(m)$r.squared, digits = 3)))
-#   as.character(as.expression(eq));
-# }
-# 
-# p1 <- p + geom_text(x = -5, y = 9, label = lm_eqn(lm_df), parse = TRUE)
-# print(p1)
-
+# save
 ggsave("/Users/jacktarricone/ch1_jemez_data/plots/fig10.pdf",
        width = 5, 
        height = 5,
        units = "in",
        dpi = 400)
 
-# save image, doesnt like back slahes in the name bc it's a file path... idk
-ggsave("/Users/jacktarricone/ch1_jemez_data/plots/swe_gpr_vs_insar_feb12_26.png",
-       width = 5, 
-       height = 5,
-       units = "in",
-       dpi = 300)
 
 
 

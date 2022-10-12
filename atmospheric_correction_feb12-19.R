@@ -89,7 +89,7 @@ plot(clipped_nsm, add = TRUE)
 
 # snow unw
 snow_unw <-mask(unw_masked, clipped_nsm, maskvalue = NA)
-plot(no_snow_unw)
+plot(snow_unw)
 
 # snow plv
 snow_plv <-mask(plv_resamp, clipped_nsm, maskvalue = NA)
@@ -113,11 +113,6 @@ snow_df <-cbind(unw_df, plv_df$plv_km)
 colnames(snow_df)[5] <- "plv_km"
 head(snow_df)
 
-
-# save the data frame for making more plots in the future
-#fwrite(no_snow_unw_plv_df, "/Volumes/JT/projects/uavsar/jemez/look_vector/no_snow_unw_plv_df.csv")
-
-?lm
 # run linear model to plot trend line
 lm_fit <-lm(snow_df$unwrapped_phase ~ snow_df$plv_km)
 summary(lm_fit)
@@ -141,23 +136,25 @@ lm_eqn <- function(df){
   as.character(as.expression(eq));
 }
 
+# create eq
+eq_label <-lm_eqn(lm_df)
+print(eq_label)
+
 ########################################
 ########### unw vs plv #################
 ########################################
 
-
 p12 <-ggplot(snow_df, aes(plv_km, unwrapped_phase)) +
   geom_hex(bins = 25) +
   scale_fill_gradient(low = "white", high = "seagreen") +
-  #stat_smooth_func2(geom="text",method="lm",hjust=0,parse=TRUE) +
   geom_smooth(method = "lm", color = "black", se = FALSE) +
-  #geom_abline(slope = coef(lm_fit)[[2]], intercept = coef(lm_fit)[[1]], size = 1)+
-  scale_y_continuous(breaks = seq(-5,15,5))+
-  scale_x_continuous(breaks = seq(10,30,5))+
+  annotate("text", x = 14, y = 4, parse = TRUE,
+           label = "italic(y) == \"-4.3\" + \"0.26\" %.% italic(x) * \",\" ~ ~italic(r)^2 ~ \"=\" ~ \"0.81\"") +
+  ylim(-5,5) + xlim(10,30)+
   labs(#title = "Jemez Radar Path Length vs. Unwrapped Phase 2/12-2/19",
        x = "PLV (km)",
        y = "Unwrapped Phase (radians)")+
-  theme(legend.position = c(.85, .2),
+  theme(legend.position = c(.85, .30),
         legend.key.size = unit(.5, 'cm'))
 
 print(p12)
@@ -169,9 +166,9 @@ print(p12)
 
 # save
 ggsave(p12,
-       file = "/Users/jacktarricone/ch1_jemez_data/plots/snow_plv_vs_unw_v2.png",
-       width = 5,
-       height = 5,
+       file = "/Users/jacktarricone/ch1_jemez_data/plots/fig05.pdf",
+       width = 6,
+       height = 4,
        dpi = 400)
 
 
@@ -194,11 +191,6 @@ head(unw_corrected_df)
 p13 <-ggplot(unw_corrected_df, aes(x, unwrapped_phase)) +
   geom_hex(bins = 25) +
   scale_fill_gradient(low = "grey90", high = "red") +
-  #stat_smooth_func2(geom="text",method="lm",hjust=0,parse=TRUE) +
-  #geom_smooth(method = "lm", se = FALSE) +
-  #geom_abline(slope = coef(lm_fit)[[2]], intercept = coef(lm_fit)[[1]], size = 1)+
-  #scale_y_continuous(breaks = seq(-5,15,5))+
-  #scale_x_continuous(breaks = seq(10,30,5))+
   labs(title = "Jemez Unwrapped Phase Corrected",
        x = "Longitude (degrees)",
        y = "Unwrapped Phase (radians)")+

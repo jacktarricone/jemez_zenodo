@@ -38,12 +38,12 @@ snow_end_dowy <-    rep(150, times = 3)
 bias <-             rep(0, times = 3)
 max_thresh <-       c(70,90,90)
 min_thresh <-       c(50,57,75)
-fft_basis <-        751
+fft_basis <-        101
 
 #Above values can be assessed visually using example plot code below
-ggplotly(ggplot(depth_df, aes(date_time, hv_snow_depth_cm)) + 
-          geom_point() +
-          geom_hline(yintercept = 0, lty = "dashed", color = "gray"))
+# ggplotly(ggplot(depth, aes(date_time, DSDepth_1)) + 
+#           geom_point() +
+#           geom_hline(yintercept = 0, lty = "dashed", color = "gray"))
 
 ###############################################################################################
 ###############################################################################################
@@ -62,7 +62,7 @@ for (i in 1:n_sensors){
   
   ###############################################################################################
   #1: Subset data
-  tmp <- dplyr::select(depth_def, 
+  tmp <- dplyr::select(depth, 
                       date_time, dowy, #grab date data
                       matches(paste0("DSDepth_", i, "$")))  #$ = exact match at end of string
   
@@ -94,7 +94,7 @@ for (i in 1:n_sensors){
   #5 cm seems to be about the max of real snowfall events
   del_thresh = 5
   tmp$del_depth <- c(0, diff(tmp$depth_lvl_1b))
-  
+
   tmp$depth_lvl_2 <- ifelse(tmp$del_depth > del_thresh |
                               tmp$del_depth < (-1 * del_thresh) |
                               is.na(tmp$del_depth),
@@ -221,7 +221,6 @@ for (i in 1:n_sensors){
   #Above techniques cannot cope with gaps
   tmp_smooth <- filter(dplyr::select(tmp, date_time, depth_lvl_4), 
                        is.na(depth_lvl_4) == F)
-  
   #7a: smooth with fft
   #value of 751 determined before hand to balance conserving real spikes w/smoothing data
   depth.basis = create.fourier.basis(rangeval = as.numeric(range(tmp_smooth$date_time)),
@@ -261,6 +260,9 @@ for (i in 1:n_sensors){
   depth_final <- bind_rows(depth_final, tmp)
 }
 
+ggplot(depth_final)+
+  geom_line(aes(x = date_time, y = depth_lvl_4))+
+  lims(y = c(0, 100))
 
 
 ###############################################################################################
