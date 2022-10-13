@@ -24,16 +24,16 @@ flight2 <-pair_1$date_time[177]
 flight3 <-pair_1$date_time[345]
 
 # plot
-theme_set(theme_classic(18))
+theme_set(theme_classic(16))
 ggplot(pair_1) +
   geom_hline(yintercept = 0, linetype=3, col = "grey50", alpha = .7) +
   geom_vline(xintercept = flight1, linetype=1, col = "blue", alpha = .5) +
   geom_vline(xintercept = flight2, linetype=1, col = "blue", alpha = .5) +
   geom_vline(xintercept = flight3, linetype=1, col = "blue", alpha = .5) +
   geom_line(aes(x = date_time, y = mean_air_temp_c), col = "black") + 
-  scale_x_datetime(breaks = "2 day", date_labels="%d", limits = ymd_hm(c("2020-02-12 01:00", "2020-02-26 23:00")))+
+  scale_x_datetime(breaks = "2 day", date_labels="%b %d", limits = ymd_hm(c("2020-02-12 01:00", "2020-02-26 23:00")))+
   scale_y_continuous(breaks = seq(-20,10,5))+
-  xlab("Day of Feb. 2020") + ylab("Air Temperature (°C)") + 
+  xlab("Date") + ylab("Air Temperature (°C)") + 
   theme(
     axis.title.x = element_text(size = 14),
     #axis.text.x = element_text(size = 14),

@@ -77,7 +77,7 @@ ggplot(plotting_df) +
   ylim(c(-10,10)) + xlim(c(-10,10))+
   geom_point(aes(y = dswe_insar_isce, x = dswe_gpr, color = "isce"), alpha = .5) +
   geom_point(aes(y = dswe_insar_cm, x = dswe_gpr, color = "cm"), alpha = .5) +
-  scale_color_manual(name = "InSAR Pairs",
+  scale_color_manual(name = "InSAR Pair",
                      values = c('isce' = 'darkred', 'cm' = 'goldenrod'),
                      labels = c('12-26 Feb.', '12-26 Feb. Cumulative'))+
   labs(x = Delta~"SWE GPR [cm]",
