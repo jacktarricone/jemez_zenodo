@@ -18,11 +18,13 @@ rast_list <-list.files("/Users/jacktarricone/ch1_jemez_data/gpr_rasters_ryan/new
 # read in list at raster stack
 stack <-rast(rast_list)
 sources(stack) # check paths
+stack
 
 # bring in swe change data
-sensor_csv <-read.csv("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_depth_change.csv")
-sensor_locations <-vect(sensor_csv, geom = c("x","y"), crs = crs(stack))
+depth_change_csv <-read.csv("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_depth_change.csv")
+sensor_locations <-vect(depth_change_csv, geom = c("x","y"), crs = crs(stack))
 plot(sensor_locations)
+sensor_locations
 
 # bring snow depth sensor locations shapefile for cropping
 loc_raw <-vect("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
@@ -66,25 +68,28 @@ colnames(feb12_26_cm_dswe)[2] <-"insar_feb12_26_cm_dswe"
 feb12_26_cm_dswe
 
 # create new df
-sensor_csv_v2 <-cbind(sensor_csv, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
+depth_change_csv_v2 <-cbind(depth_change_csv, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
                       feb12_26_dswe$insar_feb12_26_dswe, feb12_26_cm_dswe$insar_feb12_26_cm_dswe)
 
 # rename binded colums
-names(sensor_csv_v2)[7:10] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe","insar_feb12_26_cm_dswe")
-sensor_csv_v2
+names(depth_change_csv_v2)[7:10] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe","insar_feb12_26_cm_dswe")
+depth_change_csv_v2
 
 ###################
 #### convert depth to SWE for noah's depth sensors
 ##################
 
-swe_df <-sensor_csv_v2[1:7,] # chop of hidden valley, wacky data
+swe_df <-depth_change_csv_v2[1:7,] # chop of hidden valley, wacky data
 swe_df
 
 # new snow density, taking from interval board measurements 
 new_snow_density <- .24
 
 # for the second pair 
-swe_df$feb12_26_dswe <-swe_df$feb12_26*.24
+swe_df$feb19_26_dswe <-swe_df$feb19_26*.24
+swe_df
+swe_df$feb19_26_dswe_error <-abs(swe_df$feb19_26_dswe)-abs((2+swe_df$feb19_26)*(.24+(.24*.1)))
+swe_df
 
 # read in pit data
 pit_info <-read.csv("/Users/jacktarricone/ch1_jemez_data/pit_data/perm_pits.csv")
@@ -97,8 +102,13 @@ bulk_density <-mean(pit_info$mean_density[6:7])/1000
 
 # calc SWE change
 swe_df$feb12_19_dswe <-swe_df$feb12_19*bulk_density
-swe_df$feb19_26_dswe <-swe_df$feb19_26*bulk_density
+#swe_df$feb19_26_dswe <-swe_df$feb19_26*bulk_density
 swe_df$feb12_26_dswe <-swe_df$feb12_26*bulk_density
+swe_df
+
+swe_df$feb12_19_dswe_error <-abs(swe_df$feb12_19_dswe)-abs((-2+swe_df$feb12_19)*(bulk_density+(bulk_density*.1)))
+#swe_df$feb19_26_dswe_error <-abs(swe_df$feb19_26_dswe)-abs((-2+swe_df$feb19_26)*(bulk_density+(bulk_density*.1)))
+swe_df$feb12_26_dswe_error <-abs(swe_df$feb12_26_dswe)-abs((-2+swe_df$feb12_26)*(bulk_density+(bulk_density*.1)))
 swe_df
 
 #write.csv(sensor_csv_v2, "/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_insar_swe_change.csv")
@@ -131,10 +141,48 @@ insitu_dswe <-c(swe_df$feb12_19_dswe,
                 swe_df$feb12_26_dswe,
                 swe_df$feb12_26_dswe)
 
+# error column
+insitu_error<-c(swe_df$feb12_19_dswe_error,
+                swe_df$feb19_26_dswe_error,
+                swe_df$feb12_26_dswe_error,
+                swe_df$feb12_26_dswe_error)
+
 # bind together
-plotting_df <-cbind(add_date,insar_dswe,insitu_dswe)
+plotting_df <-cbind(add_date,insar_dswe,insitu_dswe,insitu_error)
 plotting_df
 # write.csv(plotting_df, "/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_insar_swe_change_plotting_df.csv")
+
+### add error term two swe calc
+# 10% uncertainty density
+# 2 cm uncertainty depth
+
+plotting_df$insitu_error <-(-2+depth_change_csv_v2$feb12_19)*(bulk_density+(bulk_density*.1))
+
+depth_change_csv_v2
+
+normal <-depth_change_csv_v2$feb12_19*bulk_density
+den_P_depth_P <-(2+depth_change_csv_v2$feb12_19)*(bulk_density+(bulk_density*.1))
+den_M_depth_P <-(-2+depth_change_csv_v2$feb12_19)*(bulk_density+(bulk_density*.1))
+den_M_depth_M <-(-2+depth_change_csv_v2$feb12_19)*(bulk_density-(bulk_density*.1))
+den_P_depth_M <-(2+depth_change_csv_v2$feb12_19)*(bulk_density-(bulk_density*.1))
+plotting_df
+
+test <-cbind(depth_change_csv_v2$sensor,normal,den_M_depth_M,den_M_depth_P,den_P_depth_M, den_P_depth_P)
+test
+
+ggplot()+
+  #geom_point(aes(x=den_P_depth_P, y=depth_change_csv_v2$sensor), color = 'darkred', shape = 4) +
+  #geom_point(aes(x=den_M_depth_M, y=depth_change_csv_v2$sensor), color = 'darkblue', shape = 4) +
+  #geom_point(aes(x=den_M_depth_M, y=depth_change_csv_v2$sensor), color = 'darkgreen', shape = 4) +
+  #geom_point(aes(x=den_P_depth_M, y=depth_change_csv_v2$sensor), color = 'violet', shape = 4) +
+  geom_point(aes(x=normal, y=depth_change_csv_v2$sensor), color = 'black') +
+  geom_errorbar(aes(y=depth_change_csv_v2$sensor, xmin=normal+1, xmax=normal-1), 
+                  width=0.1, colour="orange", alpha=0.9, size=.5)
+  
+ 
+
+
+
 
 
 ## new plot
@@ -158,9 +206,11 @@ lm_eqn <- function(df){
 }
 
 # plot
-p <-ggplot(plotting_df, aes(insitu_dswe, insar_dswe)) +
+p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   geom_smooth(method = "lm", se = FALSE)+
-  geom_point(aes(color = date)) +
+  geom_errorbar(aes(y= insar_dswe, xmin=insitu_dswe+1, xmax=insitu_dswe-1), 
+                 width=0.1, colour = 'black', alpha=0.4, size=.5) +
+  geom_point(aes(color = date)) + 
   geom_vline(xintercept = 0, linetype=1, col = "black", alpha = 1) +
   geom_hline(yintercept = 0, linetype=1, col = "black", alpha = 1) +
   #geom_abline(intercept = 0, slope = 1, linetype = 2) +
@@ -173,19 +223,19 @@ p <-ggplot(plotting_df, aes(insitu_dswe, insar_dswe)) +
                                 'feb12_26', 'feb12_26_cm'),
                      labels = c('Feb 12-19', 'Feb 19-26',
                                 'Feb 12-26', 'Feb 12-26 CM'))+
-  scale_fill_discrete(breaks=c('B', 'C', 'A'))+
-  
+  scale_fill_discrete(breaks=c('B', 'C', 'A')) +
+  theme(legend.position = c(.83,.85))
 
 p1 <- p + geom_text(x = -3.28, y = 5, label = lm_eqn(lm_df), parse = TRUE)
 print(p1)
 
 
 # save image, doesnt like back slahes in the name bc it's a file path... idk
-ggsave("/Users/jacktarricone/ch1_jemez_data/plots/insitu_swe_vs_insar_swe_v1.png",
-       width = 5, 
-       height = 5,
-       units = "in",
-       dpi = 400)
+# ggsave("/Users/jacktarricone/ch1_jemez_data/plots/insitu_swe_vs_insar_swe_v1.png",
+#        width = 5, 
+#        height = 5,
+#        units = "in",
+#        dpi = 400)
 
 
 
