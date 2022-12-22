@@ -3,15 +3,15 @@
 # jack tarricone
 
 library(terra)
-library(ggplot2)
+library(ggplot2);theme_set(theme_classic(12))
 library(dplyr)
 library(sf)
 
-setwd("/Users/jacktarricone/ch1_jemez_data/")
+setwd("/Users/jacktarricone/ch2_jemez/")
 
 #######
 ## bring in swe change rasters
-rast_list <-list.files("/Users/jacktarricone/ch1_jemez_data/gpr_rasters_ryan/new_swe_change", 
+rast_list <-list.files("./gpr_rasters_ryan/new_swe_change", 
                        pattern = ".tif",
                        full.names = TRUE)
 
@@ -21,13 +21,13 @@ sources(stack) # check paths
 stack
 
 # bring in swe change data
-depth_change_csv <-read.csv("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_depth_change.csv")
+depth_change_csv <-read.csv("./climate_station_data/noah/insitu_depth_change.csv")
 sensor_locations <-vect(depth_change_csv, geom = c("x","y"), crs = crs(stack))
 plot(sensor_locations)
 sensor_locations
 
 # bring snow depth sensor locations shapefile for cropping
-loc_raw <-vect("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
+loc_raw <-vect("./climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
 locations <-project(loc_raw, crs(stack))
 
 # crop swe change stack, just for visualization purposes
@@ -88,11 +88,10 @@ new_snow_density <- .24
 # for the second pair 
 swe_df$feb19_26_dswe <-swe_df$feb19_26*.24
 swe_df
-swe_df$feb19_26_dswe_error <-abs(swe_df$feb19_26_dswe)-abs((2+swe_df$feb19_26)*(.24+(.24*.1)))
-swe_df
+
 
 # read in pit data
-pit_info <-read.csv("/Users/jacktarricone/ch1_jemez_data/pit_data/perm_pits.csv")
+pit_info <-read.csv("./pit_data/perm_pits.csv")
 pit_info
 
 # calc bulk density, doesn't vary much
@@ -102,12 +101,16 @@ bulk_density <-mean(pit_info$mean_density[6:7])/1000
 
 # calc SWE change
 swe_df$feb12_19_dswe <-swe_df$feb12_19*bulk_density
-#swe_df$feb19_26_dswe <-swe_df$feb19_26*bulk_density
 swe_df$feb12_26_dswe <-swe_df$feb12_26*bulk_density
 swe_df
 
+
+### add error term two swe calc
+# 10% uncertainty density
+# 2 cm uncertainty depth
+
 swe_df$feb12_19_dswe_error <-abs(swe_df$feb12_19_dswe)-abs((-2+swe_df$feb12_19)*(bulk_density+(bulk_density*.1)))
-#swe_df$feb19_26_dswe_error <-abs(swe_df$feb19_26_dswe)-abs((-2+swe_df$feb19_26)*(bulk_density+(bulk_density*.1)))
+swe_df$feb19_26_dswe_error <-abs(swe_df$feb19_26_dswe)-abs((2+swe_df$feb19_26)*(.24+(.24*.1)))
 swe_df$feb12_26_dswe_error <-abs(swe_df$feb12_26_dswe)-abs((-2+swe_df$feb12_26)*(bulk_density+(bulk_density*.1)))
 swe_df
 
@@ -156,19 +159,6 @@ plotting_df
 # 10% uncertainty density
 # 2 cm uncertainty depth
 
-plotting_df$insitu_error <-(-2+depth_change_csv_v2$feb12_19)*(bulk_density+(bulk_density*.1))
-
-depth_change_csv_v2
-
-normal <-depth_change_csv_v2$feb12_19*bulk_density
-den_P_depth_P <-(2+depth_change_csv_v2$feb12_19)*(bulk_density+(bulk_density*.1))
-den_M_depth_P <-(-2+depth_change_csv_v2$feb12_19)*(bulk_density+(bulk_density*.1))
-den_M_depth_M <-(-2+depth_change_csv_v2$feb12_19)*(bulk_density-(bulk_density*.1))
-den_P_depth_M <-(2+depth_change_csv_v2$feb12_19)*(bulk_density-(bulk_density*.1))
-plotting_df
-
-test <-cbind(depth_change_csv_v2$sensor,normal,den_M_depth_M,den_M_depth_P,den_P_depth_M, den_P_depth_P)
-test
 
 ggplot()+
   #geom_point(aes(x=den_P_depth_P, y=depth_change_csv_v2$sensor), color = 'darkred', shape = 4) +
@@ -179,21 +169,12 @@ ggplot()+
   geom_errorbar(aes(y=depth_change_csv_v2$sensor, xmin=normal+1, xmax=normal-1), 
                   width=0.1, colour="orange", alpha=0.9, size=.5)
   
- 
-
-
-
-
-
 ## new plot
 my_colors <-c('darkgreen', 'plum', 'goldenrod',  'firebrick')
 
 # create new df for lm and plotting on graph
 lm_df <-plotting_df[-c(1:4)]
 names(lm_df)[1:2] <-c("x","y")
-
-#shapiro.test(plotting_df$insar_dswe)
-#shapiro.test(plotting_df$insitu_dswe)
 
 # function for running lm, plotting equation and r2 
 lm_eqn <- function(df){
@@ -208,7 +189,7 @@ lm_eqn <- function(df){
 # plot
 p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   geom_smooth(method = "lm", se = FALSE)+
-  geom_errorbar(aes(y= insar_dswe, xmin=insitu_dswe+1, xmax=insitu_dswe-1), 
+  geom_errorbar(aes(y= insar_dswe, xmin=insitu_dswe-abs(insitu_error), xmax=insitu_dswe+abs(insitu_error)), 
                  width=0.1, colour = 'black', alpha=0.4, size=.5) +
   geom_point(aes(color = date)) + 
   geom_vline(xintercept = 0, linetype=1, col = "black", alpha = 1) +
@@ -216,8 +197,8 @@ p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   #geom_abline(intercept = 0, slope = 1, linetype = 2) +
   scale_y_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
   scale_x_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
-  ylab(Delta~"SWE InSAR [cm]") + xlab(Delta~"SWE In situ [cm]") +
-  scale_color_manual(name = "Date Range",
+  ylab(Delta~"SWE InSAR [cm]") + xlab(Delta~"SWE In Situ [cm]") +
+  scale_color_manual(name = "InSAR Pair",
                      values = my_colors,
                      breaks = c('feb12_19', 'feb19_26',
                                 'feb12_26', 'feb12_26_cm'),
@@ -231,11 +212,11 @@ print(p1)
 
 
 # save image, doesnt like back slahes in the name bc it's a file path... idk
-# ggsave("/Users/jacktarricone/ch1_jemez_data/plots/insitu_swe_vs_insar_swe_v1.png",
-#        width = 5, 
-#        height = 5,
-#        units = "in",
-#        dpi = 400)
+ggsave("./plots/fig12.pdf",
+        width = 5, 
+        height = 5,
+        units = "in",
+        dpi = 400)
 
 
 

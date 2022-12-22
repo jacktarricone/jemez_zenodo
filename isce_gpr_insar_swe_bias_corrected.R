@@ -47,6 +47,9 @@ plot(dswe_isce_crop_mask)
 plot(dswe_cm_crop_mask)
 plot(f26_m_12_mask, add = TRUE, col = hcl.colors(12, "Berlin"))
 
+plot(f26_m_12_mask)
+hist(f26_m_12_mask, breaks = 40)
+
 # convert raster to dataframe
 isce_df <-as.data.frame(dswe_isce_crop_mask, xy = TRUE, cells = TRUE, na.rm = TRUE)
 cm_df <-as.data.frame(dswe_cm_crop_mask, xy = TRUE, cells = TRUE, na.rm = TRUE)
@@ -75,43 +78,46 @@ hist(plotting_df$dswe_insar_cm, breaks = 20)
 # scattter
 #theme_set(theme_light(11)) # set theme
 
-ggplot(plotting_df) +
+p <-ggplot(plotting_df) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   ylim(c(-10,10)) + xlim(c(-10,10))+
   geom_point(aes(y = dswe_insar_isce, x = dswe_gpr, color = "isce"), alpha = .5) +
+  geom_smooth(aes(y = dswe_insar_isce, x = dswe_gpr),method = lm, se = FALSE, color = "darkgreen")+
   geom_point(aes(y = dswe_insar_cm, x = dswe_gpr, color = "cm"), alpha = .5) +
+  geom_smooth(aes(y = dswe_insar_cm, x = dswe_gpr),method = "lm", se = FALSE, color = "violet")+
   scale_color_manual(name = "InSAR Pairs",
                      values = c('isce' = 'darkred', 'cm' = 'goldenrod'),
                      labels = c('12-26 Feb.', '12-26 Feb. Cumulative'))+
   labs(x = Delta~"SWE GPR [cm]",
        y = Delta~"SWE InSAR [cm]")+
   theme(legend.position = c(.78,.80))
-    
-    # panel.grid.major = element_blank(), 
-    #     panel.grid.minor = element_blank(),
-    #     panel.background = element_rect(colour = "black", size=1))
 
-# lm_df <-cm_plotting_df[-c(1:3)]
-# names(lm_df)[1:2] <-c("x","y")
-# 
-# lm_eqn <- function(df){
-#   m <- lm(y ~ x, df);
-#   eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
-#                    list(a = format(unname(coef(m)[1]), digits = 2),
-#                         b = format(unname(coef(m)[2]), digits = 2),
-#                         r2 = format(summary(m)$r.squared, digits = 3)))
-#   as.character(as.expression(eq));
-# }
-# 
-# p1 <- p + geom_text(x = -5, y = 9, label = lm_eqn(lm_df), parse = TRUE)
-# print(p1)
+print(p)
 
-ggsave("/Users/jacktarricone/ch1_jemez_data/plots/fig10.pdf",
-       width = 5, 
-       height = 5,
-       units = "in",
-       dpi = 400)
+lm_df <-plotting_df[-c(1:4)]
+names(lm_df)[1:2] <-c("x","y")
+head(lm_df)
+
+lm_eqn <- function(df){
+  m <- lm(y ~ x, df);
+  eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2,
+                   list(a = format(unname(coef(m)[1]), digits = 2),
+                        b = format(unname(coef(m)[2]), digits = 2),
+                        r2 = format(summary(m)$r.squared, digits = 3)))
+  as.character(as.expression(eq));
+}
+
+p1 <- p + geom_text(x = -5, y = 9, label = lm_eqn(lm_df), parse = TRUE)
+print(p1)
+
+
+
+# ggsave("/Users/jacktarricone/ch1_jemez_data/plots/fig10.pdf",
+#        width = 5, 
+#        height = 5,
+#        units = "in",
+#        dpi = 400)
 
 # save image, doesnt like back slahes in the name bc it's a file path... idk
 ggsave("/Users/jacktarricone/ch1_jemez_data/plots/swe_gpr_vs_insar_feb12_26.png",
