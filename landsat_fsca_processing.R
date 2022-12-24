@@ -40,24 +40,16 @@ test_v2 <-crop(test_v1, ext(uavsar_shp)) # crop ext
 plot(test_v2)
 writeRaster(test_v2, "/Users/jacktarricone/ch1_jemez/landsat_fsca/0305_mask.tif")
 
-?subst
 # create delta fsca product
-dfsca <-fsca_0305_raw_v3 - fsca_0218_raw_v3
+dfsca <-fsca_0305_raw_v2 - fsca_0218_raw_v2
 plot(dfsca)
 
 # reproject to lat/lon
 dfsca <-project(dfsca, "EPSG:4326")
-uavsar_shp <-vect("/Users/jacktarricone/ch1_jemez/vector_data/jpl_dem_extent.shp")
-plot(dfsca)
-plot(uavsar_shp, add = TRUE)
-
-# mask for uavsar shp
-dfsca_uavsar_v1 <-mask(dfsca, uavsar_shp)
-dfsca_uavsar <-crop(dfsca_uavsar_v1, ext(uavsar_shp))
-plot(dfsca_uavsar)
-writeRaster(dfsca_uavsar, "/Users/jacktarricone/ch1_jemez/landsat_fsca/dfsca_uavsar.tif")
-
-
+dsca_m <-mask(dfsca, uavsar_shp) # mask
+dfsca_cm <-crop(dsca_m, ext(uavsar_shp)) # crop ext
+plot(dfsca_cm)
+writeRaster(dfsca_cm, "/Users/jacktarricone/ch1_jemez/landsat_fsca/dfsca_uavsar_v2.tif")
 
 #bring in DEM
 dswe_cm <-rast("/Users/jacktarricone/ch1_jemez/gpr_rasters_ryan/new_swe_change/dswe_feb12-26_sp.tif")
