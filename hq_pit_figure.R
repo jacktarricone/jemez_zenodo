@@ -50,22 +50,29 @@ display_date <- gsub("2020-", "", perm$date)
 perm <-cbind(perm,display_date)
 
 # take off zeros for graph
+perm$display_date <-gsub("01-", "1/", perm$display_date)
 perm$display_date <-gsub("02-", "2/", perm$display_date)
+perm$display_date <-gsub("03-", "3/", perm$display_date)
 
-hist(perm$avg_dielec)
-
-# snow pit plots
-# hq
+# plot perm values by depth for all of the days
 ggplot(perm, aes(x = display_date, y = seg_cm)) +
-  geom_bar(aes(fill = avg_dielec), stat="identity", color = "black", width = .5) +
-  scale_fill_continuous(high = "firebrick", low = "#f1eef6", name = expression(epsilon[s]),
-                        limits = c(1, 1.5), breaks = c(1, 1.1, 1.2, 1.3, 1.4, 1.5)) +
-  scale_y_continuous(breaks = seq(0,120,10)) +
+  geom_bar(aes(fill = avg_dielec), stat="identity", color = "black", width = .3) +
+  scale_fill_continuous(high = "firebrick", low = "#f1eef6", name = expression("A2"~epsilon[s]),
+                        limits = c(1, 2.2), breaks = c(1, 1.4, 1.8, 2.2)) +
+  scale_y_continuous(breaks = seq(0,80,10), expand = c(0, 0), limits = c(0, 80)) +
   labs(y = "Depth (cm)", x = "Date") +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
 
 
-abs(y=expression(Blah[1*d]*"%"))
+
+
+
+
+
+
+min(perm$avg_dielec, na.rm = TRUE)
+
+
 
 # assign levels to location data so you can put in proper order for poster
 
