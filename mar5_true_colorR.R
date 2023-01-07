@@ -44,6 +44,7 @@ png("mar5_vg_rgb.png", height=nrow(mar5_vg_rgb), width=ncol(mar5_vg_rgb)) # same
 plotRGB(mar5_vg_rgb, stretch = "lin", maxcell=ncell(mar5_vg_rgb)) # maxcell key
 dev.off()
 
+writeRaster(mar5_vg_rgb, "mar5_vg_rgb.tif")
 
 ##### stretch rbg values and convert to 1-255
 ## not sure i need this but good practice
