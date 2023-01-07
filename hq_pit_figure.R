@@ -5,6 +5,7 @@
 library(dplyr)
 library(lubridate)
 library(ggplot2)
+library(ggpubr)
 
 theme_classic <- function(base_size = 11, base_family = "",
                           base_line_size = base_size / 22,
@@ -55,14 +56,47 @@ perm$display_date <-gsub("02-", "2/", perm$display_date)
 perm$display_date <-gsub("03-", "3/", perm$display_date)
 
 # plot perm values by depth for all of the days
-ggplot(perm, aes(x = display_date, y = seg_cm)) +
-  geom_bar(aes(fill = avg_dielec), stat="identity", color = "black", width = .3) +
+p1 <-ggplot(perm, aes(x = display_date, y = seg_cm)) +
+  geom_bar(aes(fill = avg_dielec), stat="identity", color = "black", width = .4) +
   scale_fill_continuous(high = "firebrick", low = "#f1eef6", name = expression("A2"~epsilon[s]),
-                        limits = c(1, 2.2), breaks = c(1, 1.4, 1.8, 2.2)) +
+                        limits = c(1.1, 2.1), breaks = c(1.1, 1.3, 1.5, 1.7, 1.9, 2.1)) +
   scale_y_continuous(breaks = seq(0,80,10), expand = c(0, 0), limits = c(0, 80)) +
   labs(y = "Depth (cm)", x = "Date") +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
 
+# # find color scale range
+# min(perm$avg_density, na.rm = TRUE)
+# max(perm$avg_density, na.rm = TRUE)
+# hist(perm$avg_density, breaks = 40)
+
+# plot density values by depth
+p2 <-ggplot(perm, aes(x = display_date, y = seg_cm)) +
+  geom_bar(aes(fill = avg_density), stat="identity", color = "black", width = .4) +
+  scale_fill_continuous(high = "darkblue", low = "#f1eef6", 
+                        # name = expression(atop(textstyle("Density")))~(kg~m^{-3})),
+                        name = expression(atop(textstyle("Density"),
+                            (kg~m^{-3}))),
+                        limits = c(120, 370), breaks = c(120, 170, 220, 270, 320, 370)) +
+                        # limits = c(220, 370), breaks = c(220, 270, 370)) +
+  scale_y_continuous(breaks = seq(0,80,10), expand = c(0, 0), limits = c(0, 80)) +
+  labs(y = "Depth (cm)", x = "Date") +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+
+# combine
+figure <-ggarrange(p1, p2, 
+                   labels = c("(a)", "(b)"),
+                   label.x = .85, label.y = .2,
+                   ncol = 1, nrow = 2)
+plot(figure)
+
+??ggarrange
+
+setwd("/Users/jacktarricone/ch1_jemez/plots/drafts/")
+ggsave("hq_pit.pdf",
+       width = 6, 
+       height = 5,
+       units = "in",
+       dpi = 500)
 
 
 
@@ -70,7 +104,22 @@ ggplot(perm, aes(x = display_date, y = seg_cm)) +
 
 
 
-min(perm$avg_dielec, na.rm = TRUE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -109,6 +158,10 @@ ggplot(forest, aes(x = display_date, y = seg_cm)) +
                         limits = c(200, 500), breaks = c(200, 300, 400, 500)) +
   scale_y_continuous("Depth (cm)", breaks = seq(0, 120, by = 10), expand = c(0, 0), limits = c(0, NA)) +
   labs(title="Forest Snow Pit Timeseries", x = "Date")
+
+
+
+
 
 
 
@@ -164,29 +217,6 @@ ggplot(data=my_data_long,aes(x=Block, y=value, fill=variable, color=variable, al
   scale_alpha_manual(values=c(.3, .8))
 
 #####
-
-##### swe vs cc plot
-
-theme_set(theme_light(base_size =11))
-ggplot(swe)+ 
-  geom_point(aes(cc_percent, swe_20200129, color="01/29/2020"),size = 2) +
-  geom_point(aes(cc_percent, swe_20200205, color="02/05/2020"),size = 2) +
-  geom_point(aes(cc_percent, swe_20200212, color="02/12/2020"),size = 2) +
-  geom_point(aes(cc_percent, swe_20200219, color="02/19/2020"),size = 2) +
-  geom_point(aes(cc_percent, swe_20200226, color="02/26/2020"),size = 2) +
-  geom_point(aes(cc_percent, swe_20200304, color="03/04/2020"),size = 2) +
-  geom_point(aes(cc_percent, swe_20200311, color="03/11/2020"),size = 2) +
-  geom_point(aes(cc_percent, swe_20200322, color="03/22/2020"),size = 2) +
-  scale_x_continuous("LiDAR Canopy Cover %", breaks = c(0,20,40,60,80,100)) +
-  scale_y_continuous("SWE (mm)", breaks = c(0,50,100,150,200,250,300,350)) +
-  scale_colour_manual(values=c('01/29/2020'="#ffffcc",
-                               '02/05/2020' = "#edf8b1", '02/12/2020' = "#c7e9b4", 
-                               '02/19/2020' = "#7fcdbb", '02/26/2020' = "#41b6c4",
-                               '03/04/2020' = "#1d91c0", '03/11/2020' = "#225ea8",'03/22/2020' = "#0c2c84"))+
-  labs(title="Sagehen Creek SWE vs. Canopy Cover %", 
-       y="SWE (mm)", x="Distance along Transect (m)", color = "Date")
-
-
 # 3/22 swe vs cc test plot
 
 ggplot(swe)+ 
@@ -246,6 +276,13 @@ neworder <- c("Tower 4","Forest","Open")
 lwc_den <- arrange(transform(lwc_den,
                               location=factor(location,levels=neworder)),location)
 
+
+
+
+
+
+
+
 # Webb LWC
 # .037Es+((((Es-.051rho))-(3.17e-5)rhoe2)/158.8)-.08
 
@@ -264,48 +301,10 @@ density <-ggplot(lwc_den, aes(display_date, seg_cm)) +
 
 print(density)
 
-# dielectric vs depth
-
-dielec <-ggplot(lwc_den, aes(display_date, seg_cm)) +
-  geom_bar(aes(fill = avg_dielec, group = location), stat = "identity") +
-  scale_fill_continuous(high = "#67000d", low = "#fff5f0", name = "Dielectric Constant") +
-  scale_y_continuous(breaks = seq(0,120,10)) +
-  facet_grid( ~ location) +
-  labs(title="Sagehen Creek SnowEx 2020 Snow Pit Dielectric Constant", y = "Depth (cm)", x = "Date") 
-
-print(dielec)
-
-# lwc vs depth
-
-lwc <-ggplot(lwc_den, aes(display_date, seg_cm)) +
-  geom_bar(aes(fill = lwc, group = location), stat = "identity") +
-  scale_fill_continuous(high = "#014636", low = "#f7fcfd", name = "LWC") +
-  scale_y_continuous(breaks = seq(0,120,10)) +
-  facet_grid( ~ location) +
-  labs(title="Sagehen Creek SnowEx 2020 Volumetic LWC", y = "Depth (cm)", x = "Date") 
-
-print(lwc)
 
 
 
-# read in data for the two days we did two readings
 
-twoaday <-read.csv("/Volumes/jt/UNR_fall_20/snowex/data_analysis/pits/open_2aday_lwc.csv")
 
-neworder <- c("2/26 10:15 am","2/26 3:00 pm","3/11 9:50 am", "3/11 3:30 pm")
-twoaday <- arrange(transform(twoaday,
-                             date=factor(date,levels=neworder)),date)
 
-compare <-ggplot(twoaday, aes(date, seg_cm)) +
-  geom_bar(aes(fill = avg_dielec, group = location), stat = "identity") +
-  scale_fill_continuous(high = "#67000d", low = "#fff5f0", name = "Dielectric Constant") +
-  scale_y_continuous(breaks = seq(0,40,10)) +
-  facet_grid( ~ location) +
-  labs(title="Sagehen Open WISe Morning vs. Afternoon", y = "Depth (cm)", x = "Date") 
 
-print(compare)
-
-# permitivty vs density
-
-ggplot(lwc_den, aes(avg_dielec, avg_density)) +
-  geom_point()
