@@ -8,22 +8,14 @@ library(sf)
 
 # feb 18th 2020
 # bringg in raw fSCA feb 18th data downloaded from landsat web portal
-fsca_0218_raw <-rast("/Users/jacktarricone/ch1_jemez_data/landsat_fsca/feb_18/LC08_CU_010012_20200218_20200227_C01_V01_SNOW.tif")
+fsca_0218_raw <-rast("/Users/jacktarricone/ch1_jemez/landsat_fsca/feb_18/LC08_CU_010012_20200218_20200227_C01_V01_SNOW.tif")
 fsca_0218_raw <-fsca_0218_raw/10 # correct [%] scale
 fsca_0218_raw # check
 plot(fsca_0218_raw) # test plot
 
-## testing
-
-# f18_v1 <- project(fsca_0218_raw, "EPSG:4326")
-# f18_v2 <-crop(f18_v1, jemez_wkt)
-# f18_v3 <-mask(f18_v2, cc_v5, maskvalue = -999)
-# plot(f18_v3)
-# hist(f18_v3, breaks = 100)
-
 # march 5th 2020
 # bringg in raw fSCA feb 18th data downloaded from landsat web portal
-fsca_0305_raw <-rast("/Users/jacktarricone/ch1_jemez_data/landsat_fsca/fsca_mar_05/fsac_mar_05.tif")
+fsca_0305_raw <-rast("/Users/jacktarricone/ch1_jemez/landsat_fsca/fsca_mar_05/fsac_mar_05.tif")
 fsca_0305_raw <-fsca_0305_raw/10 # correct [%] scale
 fsca_0305_raw # check
 plot(fsca_0305_raw) # test plot
@@ -38,20 +30,20 @@ dfsca <- project(dfsca, "EPSG:4326")
 plot(dfsca)
 
 #bring in DEM
-dswe_cm <-rast("/Users/jacktarricone/ch1_jemez_data/gpr_rasters_ryan/new_swe_change/dswe_feb12-26_sp.tif")
-dswe_cm
-plot(dswe_cm)
+dswe_19_26 <-rast("/Users/jacktarricone/ch1_jemez/gpr_rasters_ryan/new_swe_change/dswe_feb19-26_sp.tif")
+dswe_19_26
+plot(dswe_19_26)
 
 # crop to extent of SWE data
-dfsca_crop <-crop(dfsca, ext(dswe_cm))
+dfsca_crop <-crop(dfsca, ext(dswe_19_26))
 plot(dfsca_crop)
 # writeRaster(dfsca_crop, "/Users/jacktarricone/ch1_jemez_data/gpr_rasters_ryan/dfsca_30m.tif")
 
 # resample SWE data up to 30m landsat
-dswe_cum30m <-resample(dswe_cm, dfsca_crop, method = "bilinear")
-dswe_cum30m
-plot(dswe_cum30m)
-#writeRaster(dswe_cum30m, "/Users/jacktarricone/ch1_jemez_data/gpr_rasters_ryan/dswe_cm_30m.tif")
+dswe_30m <-resample(dswe_19_26, dfsca_crop, method = "bilinear")
+dswe_30m
+plot(dswe_30m)
+# writeRaster(dswe_30m, "/Users/jacktarricone/ch1_jemez/gpr_rasters_ryan/dswe_19_26_30m.tif")
 
 
 # mask for missing pixels in SWE data
