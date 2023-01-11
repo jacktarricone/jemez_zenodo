@@ -24,12 +24,8 @@ cor_mask <-cor
 plv_km_crop <-resample(plv_km_raw, cor_mask)
 cor_mask_v2 <-mask(cor_mask, plv_km_crop, maskvalue=NA)
 plv_masked <-mask(plv_km_crop, cor_mask_v2, maskvalue=NA)
+plv_masked
 plot(plv_masked, add = TRUE)
-
-cor_mask_v2[cor_mask_v2==0] <- -NA
-cor_mask_v2[cor_mask_v2>0] <-999
-plot(cor_mask_v2)
-#writeRaster(cor_mask_v2, "cor_mask.tif")
 
 ##############
 ### bring in all the insar data 
@@ -40,49 +36,29 @@ unw_raw <-rast("./feb12-26/HH/alamos_35915_20005-003_20013-000_0014d_s01_L090HH_
 unw_raw
 plot(unw_raw, add = TRUE)
 
-
 #########################################
 ## resample and crop to one size ########
 #########################################
 
-# resample look vector to unwrapped phase
-unw_v1 <-mask(unw_raw, plv_masked, maskvalue=NA)
-
-
-# plv_resamp_v1 <-resample(plv_km, unw_raw, method = "bilinear")
-# plv_resamp <-mask(plv_resamp_v1, cor_mask, maskvalue = NA)
-# ext(plv_resamp) <-ext(unw_raw) # set extent as same as unw
-# plv_resamp
-# plot(plv_resamp, add = TRUE)
-
-# test plot
-plot(plv_masked)
-plot(unw_v1, add = TRUE)
-
-plv_resamp
-unw_raw
+unw_masked <-mask(unw_raw, plv_masked, maskvalue=NA)
 
 #### crop down to largest size possible with all overlapping pixels
 # create new rast, set non NA values to 0 for unw
-unw_non_na <-unw_raw
+unw_non_na <-unw_masked
 values(unw_non_na)[!is.na(unw_non_na[])] = 1
 plot(unw_non_na)
 
 # same thing for plv
-plv_resamp_non_na <-plv_resamp
+plv_resamp_non_na <-plv_masked
 
 # crop plv with unw, this leaves only the cells that exist in both data sets for plotting
-plv_unw_mask <-terra::mask(plv_resamp_non_na, unw_non_na, maskvalues=NA)
+plv_unw_mask <-mask(plv_resamp_non_na, unw_non_na, maskvalues=NA)
 plot(plv_unw_mask)
 
 # test plot, looks good
-plot(plv_resamp)
-plot(unw_raw, add = TRUE)
+plot(plv_masked)
+plot(unw_masked, add = TRUE)
 plot(plv_unw_mask, add = TRUE)
-
-# check data, good
-unw_raw
-plv_unw_mask
 
 ########################################
 ## bring in the no snow mask ###########
@@ -90,26 +66,27 @@ plv_unw_mask
 
 # using the snow mask, only analyze pixels that have no snow to check for atmospheric delay
 # we do this because we're assuming there is some snow signal combine with atm signal in no pixels
-# by doing just these, in theory we're just focusing on the atmospheric protion
+# by doing just these, in theory we're just focusing on the atmospheric portion
 
-#################### snow mask
-
+### snow mask
 snow_mask_raw <-rast("./gpr_rasters_ryan/landsat_fsca_2-18.tif")
 plot(snow_mask_raw)
 
 # clip edges off no snow mask to make it same size as plv and unw
-sm_v1 <-resample(snow_mask_raw, unw_raw)
+sm_v1 <-resample(snow_mask_raw, unw_v1)
 snow_mask <-mask(sm_v1, unw_raw, maskvalue = NA)
 plot(snow_mask)
 
 #### snow unw and plv
 # snow unw
-snow_unw <-mask(unw_raw, snow_mask, maskvalue = NA)
+snow_unw <-mask(unw_masked, snow_mask, maskvalue = NA)
 plot(snow_unw)
+snow_unw
 
 # snow plv
 snow_plv <-mask(plv_unw_mask, snow_unw, maskvalue = NA)
 plot(snow_plv)
+snow_plv
 
 ### convert no snow plv and unw rasters to dataframes, rename data columns
 # unw
@@ -125,7 +102,7 @@ head(plv_df)
 hist(plv_df$plv_km, breaks = 100) #quick hist to check
 
 # bind last column on for future plot
-plotting_df<-cbind(unw_df, plv_df$plv_km)
+plotting_df <-cbind(unw_df, plv_df$plv_km)
 head(plotting_df)
 colnames(plotting_df)[5] <- "plv_km"
 head(plotting_df)
@@ -257,7 +234,6 @@ StatSmoothFunc <- ggproto("StatSmooth", Stat,
 lm_fit <-lm(plotting_df$unwrapped_phase ~ plotting_df$plv_km)
 summary(lm_fit)
 
-
 ########################################
 ########### unw vs plv #################
 ########################################
@@ -272,7 +248,7 @@ p9 <-ggplot(plotting_df, aes(plv_km, unwrapped_phase)) +
   #geom_abline(slope = coef(lm_fit)[[2]], intercept = coef(lm_fit)[[1]], size = 1)+
   #scale_y_continuous(breaks = seq(-5,6,2))+
   labs(#title = "Unwrapped Phase vs. Radar Look Vector Length 2/12-2/26 Pair",
-       x = "Radar Look Vector Length (km)",
+       x = "LKV (km)",
        y = "Unwrapped Phase (radians)")+
   scale_x_reverse()+
   theme(axis.line = element_line(colour = "black"),

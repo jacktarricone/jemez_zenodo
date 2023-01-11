@@ -1,76 +1,64 @@
-####### atmospheric correction #######
-# for the feb 12th - feb 19th jemez data
-# updated jan 28th
-
+# atmosphereic correction for 12-26 pair
+# jack tarricone
+# january 10th, 2023
 
 library(terra)
 library(ggplot2)
 
 # set home folder
-setwd("/Users/jacktarricone/ch1_jemez_data/gpr_rasters_ryan/")
+setwd("/Users/jacktarricone/ch1_jemez/")
 list.files() #pwd
 
 # path length raster 
-plv_km <-rast("plv_km.tif")
-plv_km
-plot(plv_km)
+plv_km_raw <-rast("./gpr_rasters_ryan/plv_km.tif")
+plv_km_raw
+plot(plv_km_raw)
+
+# bring in coherence raster for masking
+cor <-rast("./feb12-26/HH/alamos_35915_20005-003_20013-000_0014d_s01_L090HH_01.cor.grd.tiff")
+cor
+plot(cor)
+
+# create masking raster with smallest possible extent
+cor_mask <-cor
+plv_km_crop <-resample(plv_km_raw, cor_mask)
+cor_mask_v2 <-mask(cor_mask, plv_km_crop, maskvalue=NA)
+plv_masked <-mask(plv_km_crop, cor_mask_v2, maskvalue=NA)
+plv_masked
+plot(plv_masked, add = TRUE)
 
 ##############
 ### bring in all the insar data 
 ##############
 
 # unw
-unw_raw <-rast("unw_raw_feb12-19.tif")
+unw_raw <-rast("./feb12-26/HH/alamos_35915_20005-003_20013-000_0014d_s01_L090HH_01.unw.grd.tiff")
 unw_raw
-plot(unw_raw)
-
-# cor
-cor <-rast("cor_feb12-19.tif")
-cor
-plot(cor)
-
+plot(unw_raw, add = TRUE)
 
 #########################################
 ## resample and crop to one size ########
 #########################################
 
-# resample look vector to unwrapped phase
-plv_resamp <-resample(plv_km, unw_raw, method = "bilinear")
-plv_resamp
-ext(plv_resamp) <-ext(unw_raw) # set extent as same as unw
-plv_resamp
-
-# test plot
-plot(unw_raw)
-plot(plv_resamp, add = TRUE)
+unw_masked <-mask(unw_raw, plv_masked, maskvalue=NA)
 
 #### crop down to largest size possible with all overlapping pixels
 # create new rast, set non NA values to 0 for unw
-unw_non_na <-unw_raw
+unw_non_na <-unw_masked
 values(unw_non_na)[!is.na(unw_non_na[])] = 1
 plot(unw_non_na)
 
 # same thing for plv
-plv_resamp_non_na <-plv_resamp
-values(plv_resamp_non_na)[!is.na(plv_resamp_non_na[])] = 1
-plot(plv_resamp_non_na)
+plv_resamp_non_na <-plv_masked
 
 # crop plv with unw, this leaves only the cells that exist in both data sets for plotting
-plv_crop1 <-terra::mask(plv_resamp_non_na, unw_non_na, maskvalues=NA)
-plv_unw_mask <-terra::mask(unw_non_na, plv_crop1, maskvalues=NA)
+plv_unw_mask <-mask(plv_resamp_non_na, unw_non_na, maskvalues=NA)
+plot(plv_unw_mask)
 
 # test plot, looks good
-plot(plv_resamp)
-plot(unw_raw, add = TRUE)
+plot(plv_masked)
+plot(unw_masked, add = TRUE)
 plot(plv_unw_mask, add = TRUE)
-
-# mask both unw and plv with the mask
-unw_masked <-terra::mask(unw_raw, plv_unw_mask, maskvalues=NA)
-plot(unw_masked)
-
-plv_masked <-terra::mask(plv_resamp, plv_unw_mask, maskvalues=NA)
-plot(plv_masked, add = TRUE)
-
 
 ########################################
 ## bring in the no snow mask ###########
@@ -78,22 +66,27 @@ plot(plv_masked, add = TRUE)
 
 # using the snow mask, only analyze pixels that have no snow to check for atmospheric delay
 # we do this because we're assuming there is some snow signal combine with atm signal in no pixels
-# by doing just these, in theory we're just focusing on the atmospheric protion
+# by doing just these, in theory we're just focusing on the atmospheric portion
 
-no_snow_mask <-rast("landsat_fsca_2-18.tif")
-plot(no_snow_mask, add = TRUE)
+### snow mask
+snow_mask_raw <-rast("./gpr_rasters_ryan/landsat_fsca_2-18.tif")
+plot(snow_mask_raw)
 
 # clip edges off no snow mask to make it same size as plv and unw
-clipped_nsm <-mask(no_snow_mask, unw_masked, maskvalue = NA)
-plot(clipped_nsm, add = TRUE)
+sm_v1 <-resample(snow_mask_raw, unw_masked)
+snow_mask <-mask(sm_v1, unw_raw, maskvalue = NA)
+plot(snow_mask)
 
+#### snow unw and plv
 # snow unw
-snow_unw <-mask(unw_masked, clipped_nsm, maskvalue = NA)
+snow_unw <-mask(unw_masked, snow_mask, maskvalue = NA)
 plot(snow_unw)
+snow_unw
 
 # snow plv
-snow_plv <-mask(plv_resamp, clipped_nsm, maskvalue = NA)
+snow_plv <-mask(plv_unw_mask, snow_unw, maskvalue = NA)
 plot(snow_plv)
+snow_plv
 
 ### convert no snow plv and unw rasters to dataframes, rename data columns
 # unw
@@ -123,9 +116,6 @@ lm_df <-snow_df[-c(1:3)]
 names(lm_df)[1:2] <-c("y","x")
 head(lm_df)
 
-#shapiro.test(plotting_df$insar_dswe)
-#shapiro.test(plotting_df$insitu_dswe)
-
 # function for running lm, plotting equation and r2 
 lm_eqn <- function(df){
   m <- lm(y ~ x, df);
@@ -144,12 +134,14 @@ print(eq_label)
 ########### unw vs plv #################
 ########################################
 
+theme_set(theme_classic(12))
+
 p12 <-ggplot(snow_df, aes(plv_km, unwrapped_phase)) +
   geom_hex(bins = 25) +
   scale_fill_gradient(low = "white", high = "seagreen") +
   geom_smooth(method = "lm", color = "black", se = FALSE) +
   annotate("text", x = 14, y = 4, parse = TRUE,
-           label = "italic(y) == \"-4.3\" + \"0.26\" %.% italic(x) * \",\" ~ ~italic(r)^2 ~ \"=\" ~ \"0.81\"") +
+           label = "italic(y) == \"0.12\" + \"0.14\" %.% italic(x) * \",\" ~ ~italic(r)^2 ~ \"=\" ~ \"0.39\"") +
   ylim(-5,5) + xlim(10,30)+
   labs(#title = "Jemez Radar Path Length vs. Unwrapped Phase 2/12-2/19",
        x = "PLV (km)",
@@ -177,10 +169,11 @@ ggsave(p12,
 path_length_correction <-function(unw, plv){
   return((unw - ((plv * coef(lm_fit)[[2]]) + coef(lm_fit)[[1]])))
   }
+
 unw_corrected <-path_length_correction(unw_masked, plv_masked)
 plot(unw_corrected)
 
-writeRaster(unw_corrected, "unw_corrected_feb12-19.tif")
+writeRaster(unw_corrected, "./gpr_rasters_ryan/unw_corrected_new_feb12-26.tif")
 
 # test plot with corrected data
 
