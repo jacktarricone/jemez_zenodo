@@ -7,7 +7,37 @@ library(ggplot2);theme_set(theme_classic(12))
 library(dplyr)
 library(sf)
 
-setwd("/Users/jacktarricone/ch2_jemez/")
+# set custom theme
+theme_classic <- function(base_size = 11, base_family = "",
+                          base_line_size = base_size / 22,
+                          base_rect_size = base_size / 22) {
+  theme_bw(
+    base_size = base_size,
+    base_family = base_family,
+    base_line_size = base_line_size,
+    base_rect_size = base_rect_size
+  ) %+replace%
+    theme(
+      # no background and no grid
+      panel.border     = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      
+      # show axes
+      # axis.line      = element_line(colour = "black", linewidth = rel(1)),
+      
+      # match legend key to panel.background
+      legend.key       = element_blank(),
+      
+      # simple, black and white strips
+      strip.background = element_rect(fill = "white", colour = "black", linewidth = rel(2)),
+      # NB: size is 1 but clipped, it looks like the 0.5 of the axes
+      
+      complete = TRUE
+    )
+}
+
+setwd("/Users/jacktarricone/ch1_jemez/")
 
 #######
 ## bring in swe change rasters
@@ -39,7 +69,6 @@ points(sensor_locations, cex = 1)
 
 # rasters from orginal stack
 feb12_19 <-stack[[1]]
-feb12_26_cm <-stack[[2]]
 feb12_26 <-stack[[3]]
 feb19_26 <-stack[[4]]
 
@@ -62,17 +91,12 @@ feb12_26_dswe <-terra::extract(feb12_26, sensor_locations,  cells = TRUE, xy = T
 colnames(feb12_26_dswe)[2] <-"insar_feb12_26_dswe"
 feb12_26_dswe
 
-## feb 12-26 cumulative
-feb12_26_cm_dswe <-terra::extract(feb12_26_cm, sensor_locations,  cells = TRUE, xy = TRUE)
-colnames(feb12_26_cm_dswe)[2] <-"insar_feb12_26_cm_dswe"
-feb12_26_cm_dswe
-
 # create new df
 depth_change_csv_v2 <-cbind(depth_change_csv, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
-                      feb12_26_dswe$insar_feb12_26_dswe, feb12_26_cm_dswe$insar_feb12_26_cm_dswe)
+                      feb12_26_dswe$insar_feb12_26_dswe)
 
 # rename binded colums
-names(depth_change_csv_v2)[7:10] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe","insar_feb12_26_cm_dswe")
+names(depth_change_csv_v2)[7:9] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe")
 depth_change_csv_v2
 
 ###################
@@ -89,7 +113,6 @@ new_snow_density <- .24
 swe_df$feb19_26_dswe <-swe_df$feb19_26*.24
 swe_df
 
-
 # read in pit data
 pit_info <-read.csv("./pit_data/perm_pits.csv")
 pit_info
@@ -98,12 +121,10 @@ pit_info
 # this value will be used for the first pair because there was no new snow
 bulk_density <-mean(pit_info$mean_density[6:7])/1000
 
-
 # calc SWE change
 swe_df$feb12_19_dswe <-swe_df$feb12_19*bulk_density
 swe_df$feb12_26_dswe <-swe_df$feb12_26*bulk_density
 swe_df
-
 
 ### add error term two swe calc
 # 10% uncertainty density
@@ -117,16 +138,14 @@ swe_df
 #write.csv(sensor_csv_v2, "/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_insar_swe_change.csv")
 
 #### format df for plotting and anlysis
-
 # repeat dates so they can be grouped by
 first <-rep(names(swe_df[4]), length = nrow(swe_df)) 
 second <-rep(names(swe_df[5]), length = nrow(swe_df)) 
 third <-rep(names(swe_df[6]), length = nrow(swe_df))
-fourth <-rep("feb12_26_cm", length = nrow(swe_df))
-date <-c(first, second, third, fourth) # make vector
+date <-c(first, second, third) # make vector
 
 # repeat meta data
-meta <-rbind(swe_df[1:3],swe_df[1:3],swe_df[1:3],swe_df[1:3])
+meta <-rbind(swe_df[1:3],swe_df[1:3],swe_df[1:3])
 
 # bind date vector
 add_date <-cbind(meta, date)
@@ -135,19 +154,16 @@ add_date
 # make swe data column in proper order
 insar_dswe <-c(swe_df$insar_feb12_19_dswe,
                swe_df$insar_feb19_26_dswe,
-               swe_df$insar_feb12_26_dswe,
-               swe_df$insar_feb12_26_cm_dswe)
+               swe_df$insar_feb12_26_dswe)
 
 # make insitu column
 insitu_dswe <-c(swe_df$feb12_19_dswe,
                 swe_df$feb19_26_dswe,
-                swe_df$feb12_26_dswe,
                 swe_df$feb12_26_dswe)
 
 # error column
 insitu_error<-c(swe_df$feb12_19_dswe_error,
                 swe_df$feb19_26_dswe_error,
-                swe_df$feb12_26_dswe_error,
                 swe_df$feb12_26_dswe_error)
 
 # bind together
@@ -170,7 +186,7 @@ ggplot()+
                   width=0.1, colour="orange", alpha=0.9, size=.5)
   
 ## new plot
-my_colors <-c('darkgreen', 'plum', 'goldenrod',  'firebrick')
+my_colors <-c('darkgreen', 'plum', 'goldenrod')
 
 # create new df for lm and plotting on graph
 lm_df <-plotting_df[-c(1:4)]
@@ -192,22 +208,20 @@ p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   geom_errorbar(aes(y= insar_dswe, xmin=insitu_dswe-abs(insitu_error), xmax=insitu_dswe+abs(insitu_error)), 
                  width=0.1, colour = 'black', alpha=0.4, size=.5) +
   geom_point(aes(color = date)) + 
-  geom_vline(xintercept = 0, linetype=1, col = "black", alpha = 1) +
-  geom_hline(yintercept = 0, linetype=1, col = "black", alpha = 1) +
-  #geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  scale_y_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
-  scale_x_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
-  ylab(Delta~"SWE InSAR [cm]") + xlab(Delta~"SWE In Situ [cm]") +
+  geom_abline(intercept = 0, slope = 1, linetype = 2) +
+  scale_y_continuous(limits = c(-5,5),breaks = c(seq(-5,5,2))) +
+  scale_x_continuous(limits = c(-5,5),breaks = c(seq(-5,5,2))) +
+  ylab(Delta~"SWE InSAR (cm)") + xlab(Delta~"SWE In Situ (cm)") +
   scale_color_manual(name = "InSAR Pair",
                      values = my_colors,
-                     breaks = c('feb12_19', 'feb19_26',
-                                'feb12_26', 'feb12_26_cm'),
-                     labels = c('Feb 12-19', 'Feb 19-26',
-                                'Feb 12-26', 'Feb 12-26 CM'))+
-  scale_fill_discrete(breaks=c('B', 'C', 'A')) +
-  theme(legend.position = c(.83,.85))
+                     breaks = c('feb12_19', 'feb19_26', 'feb12_26'),
+                     labels = c('Feb. 12-19', 'Feb. 19-26', 'Feb. 12-26'))+
+  scale_fill_discrete(breaks=c('B', 'C', 'A'))  +
+  theme_classic(12) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
+  theme(legend.position = c(.83,.2))
 
-p1 <- p + geom_text(x = -3.28, y = 5, label = lm_eqn(lm_df), parse = TRUE)
+p1 <- p + geom_text(x = -3, y = 4, label = lm_eqn(lm_df), parse = TRUE)
 print(p1)
 
 

@@ -7,11 +7,11 @@ library(ggplot2)
 library(dplyr)
 library(sf)
 
-setwd("/Users/jacktarricone/ch1_jemez_data/")
+setwd("/Users/jacktarricone/ch1_jemez/")
 
 #######
 ## bring in swe change rasters
-rast_list <-list.files("/Users/jacktarricone/ch1_jemez_data/gpr_rasters_ryan/new_swe_change", 
+rast_list <-list.files("/Users/jacktarricone/ch1_jemez/gpr_rasters_ryan/new_swe_change", 
                        pattern = ".tif",
                        full.names = TRUE)
 
@@ -20,12 +20,12 @@ stack <-rast(rast_list)
 sources(stack) # check paths
 
 # bring in swe change data
-sensor_csv <-read.csv("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_depth_change.csv")
+sensor_csv <-read.csv("/Users/jacktarricone/ch1_jemez/climate_station_data/noah/insitu_depth_change.csv")
 sensor_locations <-vect(sensor_csv, geom = c("x","y"), crs = crs(stack))
 plot(sensor_locations)
 
 # bring snow depth sensor locations shapefile for cropping
-loc_raw <-vect("/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
+loc_raw <-vect("/Users/jacktarricone/ch1_jemez/climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
 locations <-project(loc_raw, crs(stack))
 
 # crop swe change stack, just for visualization purposes
@@ -37,7 +37,7 @@ points(sensor_locations, cex = 1)
 
 # rasters from orginal stack
 feb12_19 <-stack[[1]]
-feb12_26_cm <-stack[[2]]
+# feb12_26_cm <-stack[[2]]
 feb12_26 <-stack[[3]]
 feb19_26 <-stack[[4]]
 
@@ -60,17 +60,17 @@ feb12_26_dswe <-terra::extract(feb12_26, sensor_locations,  cells = TRUE, xy = T
 colnames(feb12_26_dswe)[2] <-"insar_feb12_26_dswe"
 feb12_26_dswe
 
-## feb 12-26 cumulative
-feb12_26_cm_dswe <-terra::extract(feb12_26_cm, sensor_locations,  cells = TRUE, xy = TRUE)
-colnames(feb12_26_cm_dswe)[2] <-"insar_feb12_26_cm_dswe"
-feb12_26_cm_dswe
+# ## feb 12-26 cumulative
+# feb12_26_cm_dswe <-terra::extract(feb12_26_cm, sensor_locations,  cells = TRUE, xy = TRUE)
+# colnames(feb12_26_cm_dswe)[2] <-"insar_feb12_26_cm_dswe"
+# feb12_26_cm_dswe
 
 # create new df
 sensor_csv_v2 <-cbind(sensor_csv, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
-                      feb12_26_dswe$insar_feb12_26_dswe, feb12_26_cm_dswe$insar_feb12_26_cm_dswe)
+                      feb12_26_dswe$insar_feb12_26_dswe)
 
 # rename binded colums
-names(sensor_csv_v2)[7:10] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe","insar_feb12_26_cm_dswe")
+names(sensor_csv_v2)[7:9] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe")
 sensor_csv_v2
 
 ###################
@@ -87,7 +87,7 @@ new_snow_density <- .24
 swe_df$feb12_26_dswe <-swe_df$feb12_26*.24
 
 # read in pit data
-pit_info <-read.csv("/Users/jacktarricone/ch1_jemez_data/pit_data/perm_pits.csv")
+pit_info <-read.csv("/Users/jacktarricone/ch1_jemez/pit_data/perm_pits.csv")
 pit_info
 
 # calc bulk density, doesn't vary much
@@ -109,11 +109,10 @@ swe_df
 first <-rep(names(swe_df[4]), length = nrow(swe_df)) 
 second <-rep(names(swe_df[5]), length = nrow(swe_df)) 
 third <-rep(names(swe_df[6]), length = nrow(swe_df))
-fourth <-rep("feb12_26_cm", length = nrow(swe_df))
-date <-c(first, second, third, fourth) # make vector
+date <-c(first, second, third) # make vector
 
 # repeat meta data
-meta <-rbind(swe_df[1:3],swe_df[1:3],swe_df[1:3],swe_df[1:3])
+meta <-rbind(swe_df[1:3],swe_df[1:3],swe_df[1:3])
 
 # bind date vector
 add_date <-cbind(meta, date)
@@ -122,13 +121,11 @@ add_date
 # make swe data column in proper order
 insar_dswe <-c(swe_df$insar_feb12_19_dswe,
                swe_df$insar_feb19_26_dswe,
-               swe_df$insar_feb12_26_dswe,
-               swe_df$insar_feb12_26_cm_dswe)
+               swe_df$insar_feb12_26_dswe)
 
 # make insitu column
 insitu_dswe <-c(swe_df$feb12_19_dswe,
                 swe_df$feb19_26_dswe,
-                swe_df$feb12_26_dswe,
                 swe_df$feb12_26_dswe)
 
 # bind together
@@ -143,9 +140,6 @@ my_colors <-c('darkgreen', 'plum', 'goldenrod',  'firebrick')
 # create new df for lm and plotting on graph
 lm_df <-plotting_df[-c(1:4)]
 names(lm_df)[1:2] <-c("x","y")
-
-#shapiro.test(plotting_df$insar_dswe)
-#shapiro.test(plotting_df$insitu_dswe)
 
 # function for running lm, plotting equation and r2 
 lm_eqn <- function(df){
