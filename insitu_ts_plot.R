@@ -11,6 +11,8 @@ library(readxl)
 library(lubridate)
 library(ggplot2);theme_set(theme_classic(12))
 
+setwd("/Users/jacktarricone/ch1_jemez/")
+
 # set custom theme
 theme_classic <- function(base_size = 11, base_family = "",
                           base_line_size = base_size / 22,
@@ -42,7 +44,7 @@ theme_classic <- function(base_size = 11, base_family = "",
 }
 
 # read in data from noah
-dat <-read_xlsx("/Users/jacktarricone/ch1_jemez/climate_station_data/noah/wy2020/Data_File/nms_wy2020_level0-1.xlsx")
+dat <-read_xlsx("./climate_station_data/noah/wy2020/Data_File/nms_wy2020_level0-1.xlsx")
 dat$date_time <-ymd_hms(dat$date_time, tz = "MST") #format to mst
 
 ###### format data for plotting
@@ -78,16 +80,16 @@ ggplot(dat)+
   lims(y = c(0, 100))
 
 # filter and plot for 2/12-2/26
-filt <-filter(dat, date_time >= "2020-02-12 00:00:00" & date_time <= "2020-03-07 18:50:00")
+filt <-filter(dat, date_time >= "2020-02-11 00:00:00" & date_time <= "2020-03-07 18:50:00")
 
 ######## read in HQ met data
-vg_met_data <-read.csv("/Users/jacktarricone/ch1_jemez/climate_station_data/vg/vg_met_data_v2.csv")
+vg_met_data <-read.csv("./climate_station_data/vg/vg_met_data_v2.csv")
 vg_met_data$vg_snow_depth_cm <-as.numeric(vg_met_data$vg_snow_depth_cm)
 vg_met_data$date_time <-mdy_hm(vg_met_data$date_time, tz = "MST")
 vg_met_data$date <-myd(vg_met_data$date)
 
 # filter down to same date range
-vg_filt <-filter(vg_met_data, date_time >= "2020-02-12 00:00:00" & date_time <= "2020-03-07 18:50:00")
+vg_filt <-filter(vg_met_data, date_time >= "2020-02-11 00:00:00" & date_time <= "2020-03-07 18:50:00")
 tail(vg_filt$date_time)
 
 # quick test plot
@@ -96,12 +98,12 @@ ggplot(vg_filt)+
   lims(y = c(0, 100))
 
 ######### read in redondo met data
-redondo_met_data <-read.csv("/Users/jacktarricone/ch1_jemez/climate_station_data/redondo/redondo_met_data_v2.csv")
+redondo_met_data <-read.csv("./climate_station_data/redondo/redondo_met_data_v2.csv")
 redondo_met_data$date_time <-ymd_hms(redondo_met_data$date_time, tz = "MST")
 redondo_met_data$date <-ymd(redondo_met_data$date)
 
 # filter down to same date range
-redondo_filt <-filter(redondo_met_data, date_time >= "2020-02-12 00:00:00" & date_time <= "2020-03-07 18:50:00")
+redondo_filt <-filter(redondo_met_data, date_time >= "2020-02-11 00:00:00" & date_time <= "2020-03-07 18:50:00")
 tail(redondo_filt$date_time)
 
 # bind snow depth and date_time cols to df
@@ -116,13 +118,13 @@ ggplot(insar) +
   geom_point(aes(x = date_time, y = vg_snow_depth_cm))
 
 # define flight dates and times
-flight1 <-as.numeric(insar$date_time[9]) # row for correct date time
-flight2 <-as.numeric(insar$date_time[178])
-flight3 <-as.numeric(insar$date_time[345])
+flight1 <-as.numeric(insar$date_time[33]) # row for correct date time
+flight2 <-as.numeric(insar$date_time[202])
+flight3 <-as.numeric(insar$date_time[369])
 
 # fine storm start and end
-storm_start <-insar$date_time[240]
-storm_end <-insar$date_time[270]
+storm_start <-insar$date_time[264]
+storm_end <-insar$date_time[294]
 
 # plot
 ggplot(insar)+
@@ -139,8 +141,7 @@ ggplot(insar)+
   geom_line(aes(x = date_time, y = DSDepth_7, col = "7"), size = .5)+
   geom_line(aes(x = date_time, y = DSDepth_9, col = "9"), size = .5)+
   geom_line(aes(x = date_time, y = vg_snow_depth_cm, col = "10"), size = 1)+
-  #geom_line(aes(x = date_time, y = hv_snow_depth_cm, col = "12"), size = .5)+
-  scale_y_continuous(limits = c(50,120),breaks = c(seq(50,120,10)))+
+  scale_y_continuous(expand = c(0,0), limits = c(40,120),breaks = c(seq(40,120,10)))+
   ylab("Depth (cm)") + xlab("Date") +
   scale_color_manual(name = "Sensor",
                      values = c('1' = 'darkgreen', '3' = 'plum', 
@@ -151,6 +152,17 @@ ggplot(insar)+
                                 '4' = 'DS_4', '6' = 'DS_6', 
                                 '7' = 'DS_7', '9' = 'DS_9',
                                 '10' = 'VG'))+
-  scale_x_datetime(breaks = "4 day", 
-                   date_labels="%b %d", 
-                   limits = ymd_hms(c("2020-02-12 01:00:00", "2020-03-07 19:00:00"), tz = "MST"))
+  # labels = function(z) gsub("^0", "", strftime(z, "%m/%d"))
+  scale_x_datetime(date_labels = "%m/%d",
+                   date_breaks = "2 day",
+                   expand = c(0,0),
+                   limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST")) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+
+# save image, doesnt like back slahes in the name bc it's a file path... idk
+ggsave("./plots/snow_depth_new_test.pdf",
+       width = 7, 
+       height = 3,
+       units = "in",
+       dpi = 500)
+
