@@ -44,7 +44,7 @@ theme_classic <- function(base_size = 11, base_family = "",
       complete = TRUE
     )
 }
-theme_set(theme_classic(15))
+theme_set(theme_classic(12))
 
 # read in data from noah
 dat <-read_xlsx("./climate_station_data/noah/wy2020/Data_File/nms_wy2020_level0-1.xlsx")
@@ -153,7 +153,8 @@ snow_depth <-ggplot(insar)+
   geom_line(aes(x = date_time, y = DSDepth_9, col = "9"), size = .5)+
   geom_line(aes(x = date_time, y = vg_snow_depth_cm, col = "10"), size = 1)+
   scale_y_continuous(expand = c(0,0), limits = c(40,120),breaks = c(seq(40,120,10)))+
-  ylab("Depth (cm)") + xlab("Date") +
+  ylab(expression(atop("Snow Depth",paste("(cm)"))))+
+  xlab("Date") +
   scale_color_manual(name = "Sensor",
                      values = c('1' = 'darkgreen', '3' = 'plum', 
                                 '4' = 'goldenrod', '6' = 'firebrick', 
@@ -168,7 +169,10 @@ snow_depth <-ggplot(insar)+
                    date_breaks = "3 day",
                    expand = c(0,0),
                    limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST")) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank())
 
 plot(snow_depth)
 
@@ -203,8 +207,13 @@ temp <-ggplot() +
   scale_y_continuous(breaks = seq(-20,10,5), 
                      limit = c(-20,10),
                      expand = c(0,0))+
-  xlab("Date") + ylab("Air Temperature (°C)") + 
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+  xlab("Date") +
+  ylab(expression(atop("Air Temperature",paste("(°C)"))))+
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank())
+plot(temp)
 
 ggsave("./plots/temp_new_test.pdf",
        width = 7,
@@ -235,8 +244,13 @@ wind <-ggplot() +
   scale_y_continuous(breaks = seq(0,8,2), 
                      limit = c(0,8),
                      expand = c(0,0))+
-  xlab("Date") + ylab("Wind Speed (m/s)") + 
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+  xlab("Date") + 
+  ylab(expression(atop("Wind Speed",paste("(m/s)"))))+
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank())
+plot(wind)
 
 ggsave("./plots/wind_new_test.pdf",
        width = 7,
@@ -267,8 +281,10 @@ solar <-ggplot() +
   scale_y_continuous(breaks = seq(0,1,.2), 
                      limit = c(0,1),
                      expand = c(0,0))+
-  xlab("Date") + ylab(expression('kWh/'~m^{"2"})) + 
+  xlab("Date") + 
+  ylab(expression(atop("Insolation",paste(~'(kWh/m'^{"2"},')'))))+
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+plot(solar)
 
 ggsave("./plots/solar_new_test.pdf",
        width = 7,
@@ -279,9 +295,9 @@ ggsave("./plots/solar_new_test.pdf",
 # stack with cow plot
 plot_grid(snow_depth, temp, wind, solar, align = "v", nrow = 4, rel_heights = c(1/4, 1/4, 1/4, 1/4))
 
-ggsave("./plots/big_fig_test.pdf",
+ggsave("./plots/big_fig_test_v3.pdf",
        width = 7, 
-       height = 10,
+       height = 7,
        units = "in",
        dpi = 500)
 
