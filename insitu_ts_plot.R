@@ -10,6 +10,8 @@ library(dplyr)
 library(readxl)
 library(lubridate)
 library(ggplot2)
+library(ggpubr)
+library(cowplot)
 
 setwd("/Users/jacktarricone/ch1_jemez/")
 
@@ -131,7 +133,10 @@ fsca2 <-vg_met_data$date_time[805]
 storm_start <-insar$date_time[264]
 storm_end <-insar$date_time[294]
 
-# plot snow depth
+##############################
+#### plot snow depth #########
+##############################
+
 snow_depth <-ggplot(insar)+
   geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
   geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
@@ -174,8 +179,12 @@ ggsave("./plots/snow_depth_new_test.pdf",
        units = "in",
        dpi = 500)
 
-# plot air temperature
-ggplot() +
+
+##############################
+#### plot air temperature ####
+##############################
+
+temp <-ggplot() +
   geom_hline(yintercept = 0, linetype = 3, col = "grey50", alpha = .7) +
   geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
   geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
@@ -202,6 +211,80 @@ ggsave("./plots/temp_new_test.pdf",
        height = 3,
        units = "in",
        dpi = 500)
+
+##############################
+#### plot wind speed #########
+##############################
+
+wind <-ggplot() +
+  geom_hline(yintercept = 0, linetype = 3, col = "grey50", alpha = .7) +
+  geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight3, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = fsca1, linetype=2, col = "blue", alpha = .7) +
+  geom_vline(xintercept = fsca2, linetype=2, col = "blue", alpha = .7) +
+  geom_line(data = vg_met_data, aes(x = date_time, y = avg_wind_ms, col = "1"), size = .3) + 
+  geom_line(data = redondo_met_data, aes(x = date_time, y = avg_wind_ms, col = "2"), size = .3) + 
+  scale_color_manual(name = "Sensor",
+                     values = c('1' = 'red', '2' = 'black'),
+                     labels = c('1' = 'VG', '2' = 'RD'))+
+  scale_x_datetime(date_labels = "%m/%d",
+                   date_breaks = "3 day",
+                   expand = c(0,0),
+                   limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST"))+
+  scale_y_continuous(breaks = seq(0,8,2), 
+                     limit = c(0,8),
+                     expand = c(0,0))+
+  xlab("Date") + ylab("Wind Speed (m/s)") + 
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+
+ggsave("./plots/wind_new_test.pdf",
+       width = 7,
+       height = 3,
+       units = "in",
+       dpi = 500)
+
+##############################
+#### plot solar rad #########
+##############################
+
+solar <-ggplot() +
+  geom_hline(yintercept = 0, linetype = 3, col = "grey50", alpha = .7) +
+  geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight3, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = fsca1, linetype=2, col = "blue", alpha = .7) +
+  geom_vline(xintercept = fsca2, linetype=2, col = "blue", alpha = .7) +
+  geom_line(data = vg_met_data, aes(x = date_time, y = solar_rad_kwh, col = "1"), size = .3) + 
+  geom_line(data = redondo_met_data, aes(x = date_time, y = solar_rad, col = "2"), size = .3) + 
+  scale_color_manual(name = "Sensor",
+                     values = c('1' = 'red', '2' = 'black'),
+                     labels = c('1' = 'VG', '2' = 'RD'))+
+  scale_x_datetime(date_labels = "%m/%d",
+                   date_breaks = "3 day",
+                   expand = c(0,0),
+                   limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST"))+
+  scale_y_continuous(breaks = seq(0,1,.2), 
+                     limit = c(0,1),
+                     expand = c(0,0))+
+  xlab("Date") + ylab(expression('kWh/'~m^{"2"})) + 
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+
+ggsave("./plots/solar_new_test.pdf",
+       width = 7,
+       height = 3,
+       units = "in",
+       dpi = 500)
+
+# stack with cow plot
+plot_grid(snow_depth, temp, wind, solar, align = "v", nrow = 4, rel_heights = c(1/4, 1/4, 1/4, 1/4))
+
+ggsave("./plots/big_fig_test.pdf",
+       width = 7, 
+       height = 10,
+       units = "in",
+       dpi = 500)
+
 
 
 
