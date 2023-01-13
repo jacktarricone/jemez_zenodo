@@ -9,7 +9,7 @@
 library(dplyr)
 library(readxl)
 library(lubridate)
-library(ggplot2);theme_set(theme_classic(12))
+library(ggplot2)
 
 setwd("/Users/jacktarricone/ch1_jemez/")
 
@@ -42,6 +42,7 @@ theme_classic <- function(base_size = 11, base_family = "",
       complete = TRUE
     )
 }
+theme_set(theme_classic(15))
 
 # read in data from noah
 dat <-read_xlsx("./climate_station_data/noah/wy2020/Data_File/nms_wy2020_level0-1.xlsx")
@@ -117,21 +118,26 @@ names(insar)[29] <- "vg_snow_depth_cm"
 ggplot(insar) +
   geom_point(aes(x = date_time, y = vg_snow_depth_cm))
 
-# define flight dates and times
+# define flight dates and times for uavsar
 flight1 <-as.numeric(insar$date_time[33]) # row for correct date time
 flight2 <-as.numeric(insar$date_time[202])
 flight3 <-as.numeric(insar$date_time[369])
+
+# landsat aquisistions
+fsca1 <-vg_met_data$date_time[424]
+fsca2 <-vg_met_data$date_time[805]
 
 # fine storm start and end
 storm_start <-insar$date_time[264]
 storm_end <-insar$date_time[294]
 
-# plot
-ggplot(insar)+
-  theme_classic(12)+
-  geom_vline(xintercept = flight1, linetype=3, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight2, linetype=3, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight3, linetype=3, col = "black", alpha = .7) +
+# plot snow depth
+snow_depth <-ggplot(insar)+
+  geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight3, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = fsca1, linetype=2, col = "blue", alpha = .7) +
+  geom_vline(xintercept = fsca2, linetype=2, col = "blue", alpha = .7) +
   annotate("rect", xmin = storm_start, xmax = storm_end,
            ymin = -Inf, ymax = Inf, alpha = .2)+
   geom_line(aes(x = date_time, y = DSDepth_1, col = "1"), size = .5)+
@@ -154,15 +160,48 @@ ggplot(insar)+
                                 '10' = 'VG'))+
   # labels = function(z) gsub("^0", "", strftime(z, "%m/%d"))
   scale_x_datetime(date_labels = "%m/%d",
-                   date_breaks = "2 day",
+                   date_breaks = "3 day",
                    expand = c(0,0),
                    limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST")) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
 
-# save image, doesnt like back slahes in the name bc it's a file path... idk
+plot(snow_depth)
+
+# # save image
 ggsave("./plots/snow_depth_new_test.pdf",
-       width = 7, 
+       width = 7,
        height = 3,
        units = "in",
        dpi = 500)
+
+# plot air temperature
+ggplot() +
+  geom_hline(yintercept = 0, linetype = 3, col = "grey50", alpha = .7) +
+  geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = flight3, linetype=2, col = "black", alpha = .7) +
+  geom_vline(xintercept = fsca1, linetype=2, col = "blue", alpha = .7) +
+  geom_vline(xintercept = fsca2, linetype=2, col = "blue", alpha = .7) +
+  geom_line(data = vg_met_data, aes(x = date_time, y = mean_air_temp_c, col = "1"), size = .4) + 
+  geom_line(data = redondo_met_data, aes(x = date_time, y = mean_air_temp_c, col = "2"), size = .4) +
+  scale_color_manual(name = "Sensor",
+                     values = c('1' = 'red', '2' = 'black'),
+                     labels = c('1' = 'VG', '2' = 'RD'))+
+  scale_x_datetime(date_labels = "%m/%d",
+                   date_breaks = "3 day",
+                   expand = c(0,0),
+                   limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST"))+
+  scale_y_continuous(breaks = seq(-20,10,5), 
+                     limit = c(-20,10),
+                     expand = c(0,0))+
+  xlab("Date") + ylab("Air Temperature (°C)") + 
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+
+ggsave("./plots/temp_new_test.pdf",
+       width = 7,
+       height = 3,
+       units = "in",
+       dpi = 500)
+
+
 
