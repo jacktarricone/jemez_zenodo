@@ -10,7 +10,6 @@ library(dplyr)
 library(readxl)
 library(lubridate)
 library(ggplot2)
-library(ggpubr)
 library(cowplot)
 
 setwd("/Users/jacktarricone/ch1_jemez/")
@@ -86,18 +85,17 @@ ggplot(dat)+
 filt <-filter(dat, date_time >= "2020-02-11 00:00:00" & date_time <= "2020-03-07 18:50:00")
 
 ######## read in HQ met data
-vg_met_data <-read.csv("./climate_station_data/vg/vg_met_data_v2.csv")
-vg_met_data$vg_snow_depth_cm <-as.numeric(vg_met_data$vg_snow_depth_cm)
+vg_met_data <-read.csv("./climate_station_data/vg/vg_snow_depth_qaqc_NEW.csv")
 vg_met_data$date_time <-mdy_hm(vg_met_data$date_time, tz = "MST")
-vg_met_data$date <-myd(vg_met_data$date)
 
 # filter down to same date range
 vg_filt <-filter(vg_met_data, date_time >= "2020-02-11 00:00:00" & date_time <= "2020-03-07 18:50:00")
+vg_filt$vg_snow_depth_cm <-vg_filt$sd_interp_v3_smooth30
 tail(vg_filt$date_time)
 
 # quick test plot
 ggplot(vg_filt)+
-  geom_line(aes(x = date_time, y = vg_snow_depth_cm))+
+  geom_line(aes(x = date_time, y = vg_snow_depth_cm)) +
   lims(y = c(0, 100))
 
 ######### read in redondo met data
@@ -138,50 +136,41 @@ storm_end <-insar$date_time[294]
 ##############################
 
 snow_depth <-ggplot(insar)+
-  geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight3, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = fsca1, linetype=2, col = "blue", alpha = .7) +
-  geom_vline(xintercept = fsca2, linetype=2, col = "blue", alpha = .7) +
+  geom_vline(xintercept = flight1, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = flight2, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = flight3, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = fsca1, linetype=2, col = "darkorange", alpha = .7) +
+  geom_vline(xintercept = fsca2, linetype=2, col = "darkorange", alpha = .7) +
   annotate("rect", xmin = storm_start, xmax = storm_end,
            ymin = -Inf, ymax = Inf, alpha = .2)+
-  geom_line(aes(x = date_time, y = DSDepth_1, col = "1"), size = .5)+
-  geom_line(aes(x = date_time, y = DSDepth_3, col = "3"), size = .5)+
-  geom_line(aes(x = date_time, y = DSDepth_4, col = "4"), size = .5)+
-  geom_line(aes(x = date_time, y = DSDepth_6, col = "6"), size = .5)+
-  geom_line(aes(x = date_time, y = DSDepth_7, col = "7"), size = .5)+
-  geom_line(aes(x = date_time, y = DSDepth_9, col = "9"), size = .5)+
-  geom_line(aes(x = date_time, y = vg_snow_depth_cm, col = "10"), size = 1)+
-  scale_y_continuous(expand = c(0,0), limits = c(40,120),breaks = c(seq(40,120,10)))+
+  geom_line(aes(x = date_time, y = DSDepth_1), col = "gray50", size = .5)+
+  geom_line(aes(x = date_time, y = DSDepth_3), col = "gray50", size = .5)+
+  geom_line(aes(x = date_time, y = DSDepth_4), col = "gray50", size = .5)+
+  geom_line(aes(x = date_time, y = DSDepth_6), col = "gray50", size = .5)+
+  geom_line(aes(x = date_time, y = DSDepth_7), col = "gray50", size = .5)+
+  geom_line(aes(x = date_time, y = DSDepth_9), col = "gray50", size = .5)+
+  geom_line(aes(x = date_time, y = vg_snow_depth_cm), col = "red", size = .5)+
+  scale_y_continuous(expand = c(0,0), 
+                     limits = c(40,120),
+                     breaks = c(seq(40,120,20)))+
   ylab(expression(atop("Snow Depth",paste("(cm)"))))+
   xlab("Date") +
-  scale_color_manual(name = "Sensor",
-                     values = c('1' = 'darkgreen', '3' = 'plum', 
-                                '4' = 'goldenrod', '6' = 'firebrick', 
-                                '7' = 'darkorange','9'='aquamarine',
-                                '10' = 'red'),
-                     labels = c('1' = 'DS_1', '3' = 'DS_3', 
-                                '4' = 'DS_4', '6' = 'DS_6', 
-                                '7' = 'DS_7', '9' = 'DS_9',
-                                '10' = 'VG'))+
-  # labels = function(z) gsub("^0", "", strftime(z, "%m/%d"))
   scale_x_datetime(date_labels = "%m/%d",
-                   date_breaks = "3 day",
-                   expand = c(0,0),
+                   date_breaks = "1 day",
+                   expand = c(0,1),
                    limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST")) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
         axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
         axis.title.x=element_blank())
 
 plot(snow_depth)
 
 # # save image
-ggsave("./plots/snow_depth_new_test.pdf",
-       width = 7,
-       height = 3,
-       units = "in",
-       dpi = 500)
+# ggsave("./plots/snow_depth_new_test.pdf",
+#        width = 7,
+#        height = 3,
+#        units = "in",
+#        dpi = 500)
 
 
 ##############################
@@ -190,19 +179,16 @@ ggsave("./plots/snow_depth_new_test.pdf",
 
 temp <-ggplot() +
   geom_hline(yintercept = 0, linetype = 3, col = "grey50", alpha = .7) +
-  geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight3, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = fsca1, linetype=2, col = "blue", alpha = .7) +
-  geom_vline(xintercept = fsca2, linetype=2, col = "blue", alpha = .7) +
-  geom_line(data = vg_met_data, aes(x = date_time, y = mean_air_temp_c, col = "1"), size = .4) + 
-  geom_line(data = redondo_met_data, aes(x = date_time, y = mean_air_temp_c, col = "2"), size = .4) +
-  scale_color_manual(name = "Sensor",
-                     values = c('1' = 'red', '2' = 'black'),
-                     labels = c('1' = 'VG', '2' = 'RD'))+
+  geom_vline(xintercept = flight1, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = flight2, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = flight3, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = fsca1, linetype=2, col = "darkorange", alpha = .7) +
+  geom_vline(xintercept = fsca2, linetype=2, col = "darkorange", alpha = .7) +
+  geom_line(data = vg_met_data, aes(x = date_time, y = mean_air_temp_c), col = "red", size = .4) + 
+  geom_line(data = redondo_met_data, aes(x = date_time, y = mean_air_temp_c), col = "black", size = .4) +
   scale_x_datetime(date_labels = "%m/%d",
-                   date_breaks = "3 day",
-                   expand = c(0,0),
+                   date_breaks = "1 day",
+                   expand = c(0,1),
                    limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST"))+
   scale_y_continuous(breaks = seq(-20,10,5), 
                      limit = c(-20,10),
@@ -211,15 +197,14 @@ temp <-ggplot() +
   ylab(expression(atop("Air Temperature",paste("(°C)"))))+
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
         axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
         axis.title.x=element_blank())
 plot(temp)
 
-ggsave("./plots/temp_new_test.pdf",
-       width = 7,
-       height = 3,
-       units = "in",
-       dpi = 500)
+# ggsave("./plots/temp_new_test.pdf",
+#        width = 7,
+#        height = 3,
+#        units = "in",
+#        dpi = 500)
 
 ##############################
 #### plot wind speed #########
@@ -227,19 +212,16 @@ ggsave("./plots/temp_new_test.pdf",
 
 wind <-ggplot() +
   geom_hline(yintercept = 0, linetype = 3, col = "grey50", alpha = .7) +
-  geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight3, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = fsca1, linetype=2, col = "blue", alpha = .7) +
-  geom_vline(xintercept = fsca2, linetype=2, col = "blue", alpha = .7) +
-  geom_line(data = vg_met_data, aes(x = date_time, y = avg_wind_ms, col = "1"), size = .3) + 
-  geom_line(data = redondo_met_data, aes(x = date_time, y = avg_wind_ms, col = "2"), size = .3) + 
-  scale_color_manual(name = "Sensor",
-                     values = c('1' = 'red', '2' = 'black'),
-                     labels = c('1' = 'VG', '2' = 'RD'))+
+  geom_vline(xintercept = flight1, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = flight2, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = flight3, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = fsca1, linetype=2, col = "darkorange", alpha = .7) +
+  geom_vline(xintercept = fsca2, linetype=2, col = "darkorange", alpha = .7) +
+  geom_line(data = vg_met_data, aes(x = date_time, y = avg_wind_ms), col = "red", size = .3) + 
+  geom_line(data = redondo_met_data, aes(x = date_time, y = avg_wind_ms), col = "black", size = .3) + 
   scale_x_datetime(date_labels = "%m/%d",
-                   date_breaks = "3 day",
-                   expand = c(0,0),
+                   date_breaks = "1 day",
+                   expand = c(0,1),
                    limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST"))+
   scale_y_continuous(breaks = seq(0,8,2), 
                      limit = c(0,8),
@@ -248,15 +230,14 @@ wind <-ggplot() +
   ylab(expression(atop("Wind Speed",paste("(m/s)"))))+
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
         axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
         axis.title.x=element_blank())
 plot(wind)
 
-ggsave("./plots/wind_new_test.pdf",
-       width = 7,
-       height = 3,
-       units = "in",
-       dpi = 500)
+# ggsave("./plots/wind_new_test.pdf",
+#        width = 7,
+#        height = 3,
+#        units = "in",
+#        dpi = 500)
 
 ##############################
 #### plot solar rad #########
@@ -264,19 +245,16 @@ ggsave("./plots/wind_new_test.pdf",
 
 solar <-ggplot() +
   geom_hline(yintercept = 0, linetype = 3, col = "grey50", alpha = .7) +
-  geom_vline(xintercept = flight1, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight2, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = flight3, linetype=2, col = "black", alpha = .7) +
-  geom_vline(xintercept = fsca1, linetype=2, col = "blue", alpha = .7) +
-  geom_vline(xintercept = fsca2, linetype=2, col = "blue", alpha = .7) +
-  geom_line(data = vg_met_data, aes(x = date_time, y = solar_rad_kwh, col = "1"), size = .3) + 
-  geom_line(data = redondo_met_data, aes(x = date_time, y = solar_rad, col = "2"), size = .3) + 
-  scale_color_manual(name = "Sensor",
-                     values = c('1' = 'red', '2' = 'black'),
-                     labels = c('1' = 'VG', '2' = 'RD'))+
+  geom_vline(xintercept = flight1, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = flight2, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = flight3, linetype=2, col = "darkblue", alpha = .7) +
+  geom_vline(xintercept = fsca1, linetype=2, col = "darkorange", alpha = .7) +
+  geom_vline(xintercept = fsca2, linetype=2, col = "darkorange", alpha = .7) +
+  geom_line(data = vg_met_data, aes(x = date_time, y = solar_rad_kwh), col = "red", size = .3) + 
+  geom_line(data = redondo_met_data, aes(x = date_time, y = solar_rad), col = "black", size = .3) + 
   scale_x_datetime(date_labels = "%m/%d",
-                   date_breaks = "3 day",
-                   expand = c(0,0),
+                   date_breaks = "2 day",
+                   expand = c(0,1),
                    limits = ymd_hms(c("2020-02-11 00:00:00", "2020-03-06 00:00:00"), tz = "MST"))+
   scale_y_continuous(breaks = seq(0,1,.2), 
                      limit = c(0,1),
@@ -286,16 +264,20 @@ solar <-ggplot() +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
 plot(solar)
 
-ggsave("./plots/solar_new_test.pdf",
-       width = 7,
-       height = 3,
-       units = "in",
-       dpi = 500)
+# ggsave("./plots/solar_new_test.pdf",
+#        width = 7,
+#        height = 3,
+#        units = "in",
+#        dpi = 500)
 
 # stack with cow plot
-plot_grid(snow_depth, temp, wind, solar, align = "v", nrow = 4, rel_heights = c(1/4, 1/4, 1/4, 1/4))
+plot_grid(snow_depth, temp, wind, solar,
+          labels = c("(a)","(b)","(c)","(d)"),
+          align = "v", 
+          nrow = 4, 
+          rel_heights = c(1/4, 1/4, 1/4, 1/4))
 
-ggsave("./plots/big_fig_test_v3.pdf",
+ggsave("./plots/big_fig_test_v5.pdf",
        width = 7, 
        height = 7,
        units = "in",

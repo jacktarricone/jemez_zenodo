@@ -101,9 +101,9 @@ hist(plotting_df$dswe_insar_cm, breaks = 20)
 ####
 ggplot(plotting_df) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  ylim(c(-6,6)) + xlim(c(-6,6))+
-  geom_point(aes(y = dswe_insar_isce, x = dswe_gpr, color = "isce"), alpha = .5, size =.8) +
-  geom_point(aes(y = dswe_insar_cm, x = dswe_gpr, color = "cm"), alpha = .5, size = .8) +
+  ylim(c(-10,10)) + xlim(c(-10,10))+
+  geom_point(aes(y = dswe_insar_isce, x = dswe_gpr, color = "isce"), alpha = .5, size = 1) +
+  geom_point(aes(y = dswe_insar_cm, x = dswe_gpr, color = "cm"), alpha = .5, size = 1) +
   scale_color_manual(name = "InSAR Pair",
                      values = c('isce' = 'darkviolet', 'cm' = 'goldenrod'),
                      labels = c('12-26 Feb.', '12-26 Feb. CM'))+
@@ -111,10 +111,10 @@ ggplot(plotting_df) +
        y = Delta~"SWE InSAR (cm)")+
   theme_classic(12) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
-  theme(legend.position = c(.2,.83))
+  theme(legend.position = c(.3,.83))
     
 # save
-ggsave("/Users/jacktarricone/ch1_jemez_data/plots/fig10.pdf",
+ggsave("/Users/jacktarricone/ch1_jemez/plots/gpr_insar_fig10.pdf",
        width = 5, 
        height = 5,
        units = "in",
