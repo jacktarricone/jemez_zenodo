@@ -111,7 +111,7 @@ plot_1 <-ggplot()+
                      expand = c(0,0)) + 
   ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
-  theme(legend.position = c(.80,.75)) +
+  theme(legend.position = c(.8,.5)) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
                                 axis.title.x=element_blank())
 
@@ -134,7 +134,7 @@ plot_2 <-ggplot()+
   xlab("SWE Change (cm)") + 
   ylab("Count") +
   scale_y_continuous(labels=fancy_scientific) +
-  theme(legend.position = c(.80,.75)) +
+  theme(legend.position = c(.8,.5)) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
 
 plot(plot_2)
@@ -143,12 +143,15 @@ plot(plot_2)
 plot_grid(plot_1, plot_2,
           labels = c("(a)","(b)"),
           align = "v", 
-          nrow = 2, 
+          nrow = 2,
+          vjust = 1.5,
+          hjust = 0.1,
           rel_heights = c(1/2, 1/2))
 
-ggsave("./plots/big_fig_test_v5.pdf",
+
+ggsave("./plots/dswe_hist_new.pdf",
        width = 7, 
-       height = 7,
+       height = 5,
        units = "in",
        dpi = 500)
 
