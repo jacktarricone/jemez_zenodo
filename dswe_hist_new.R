@@ -145,7 +145,7 @@ plot_grid(plot_1, plot_2,
           align = "v", 
           nrow = 2,
           vjust = 1.5,
-          hjust = 0.1,
+          hjust = -.2,
           rel_heights = c(1/2, 1/2))
 
 

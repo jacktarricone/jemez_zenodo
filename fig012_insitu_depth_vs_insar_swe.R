@@ -60,12 +60,19 @@ sensor_locations
 loc_raw <-vect("./climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
 locations <-project(loc_raw, crs(stack))
 
+# bring in BA it change data
+ba_raw <-read.csv("./pit_data/ba_swe_change.csv")
+ba_location <-vect(ba_raw, geom = c("x","y"), crs = crs(stack))
+plot(ba_location, add = TRUE, col = 'red')
+ba_location
+
 # crop swe change stack, just for visualization purposes
 ext(locations) # get extent
-shp_ext <-ext(-106.5342, -106.5335, 35.8837, 35.8842) # make a bit bigger for plotting
+shp_ext <-ext(-106.5342, -106.53, 35.8837, 35.889) # make a bit bigger for plotting
 stack_crop <-crop(stack, shp_ext)
 plot(stack_crop[[4]])
 points(sensor_locations, cex = 1)
+points(ba_location, col = 'red')
 
 # rasters from orginal stack
 feb12_19 <-stack[[1]]
@@ -76,6 +83,7 @@ feb19_26 <-stack[[4]]
 ### compare insitu depth change to insar swe change
 ###########################
 
+#### czo sensors
 ## feb 12-19
 feb12_19_dswe <-terra::extract(feb12_19, sensor_locations,  cells = TRUE, xy = TRUE)
 colnames(feb12_19_dswe)[2] <-"insar_feb12_19_dswe"
@@ -91,9 +99,34 @@ feb12_26_dswe <-terra::extract(feb12_26, sensor_locations,  cells = TRUE, xy = T
 colnames(feb12_26_dswe)[2] <-"insar_feb12_26_dswe"
 feb12_26_dswe
 
+#### BA pit
+## feb 12-19
+ba_feb12_19_dswe <-terra::extract(feb12_19, ba_location,  cells = TRUE, xy = TRUE)
+colnames(ba_feb12_19_dswe)[2] <-"insar_feb12_19_dswe"
+ba_feb12_19_dswe
+
+## feb 19-26
+ba_feb19_26_dswe <-terra::extract(feb19_26, ba_location,  cells = TRUE, xy = TRUE)
+colnames(ba_feb19_26_dswe)[2] <-"insar_feb19_26_dswe"
+ba_feb19_26_dswe
+
+## feb 12-26
+ba_feb12_26_dswe <-terra::extract(feb12_26, ba_location,  cells = TRUE, xy = TRUE)
+colnames(ba_feb12_26_dswe)[2] <-"insar_feb12_26_dswe"
+ba_feb12_26_dswe
+
+# rbind BA data to insar change csvs
+feb12_19_dswe_v2 <-rbind(feb12_19_dswe,ba_feb12_19_dswe)
+feb19_26_dswe_v2 <-rbind(feb19_26_dswe,ba_feb19_26_dswe)
+
+
+# rbind BA data to depth change csv
+depth_change_csv_ba <-rbind(depth_change_csv, ba_raw)
+
 # create new df
-depth_change_csv_v2 <-cbind(depth_change_csv, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
+depth_change_csv_v2 <-cbind(depth_change_csv_ba, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
                       feb12_26_dswe$insar_feb12_26_dswe)
+
 
 # rename binded colums
 names(depth_change_csv_v2)[7:9] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe")
@@ -125,6 +158,10 @@ bulk_density <-mean(pit_info$mean_density[6:7])/1000
 swe_df$feb12_19_dswe <-swe_df$feb12_19*bulk_density
 swe_df$feb12_26_dswe <-swe_df$feb12_26*bulk_density
 swe_df
+
+# add BA pit SWE change to dswe dataframe
+ba <-c(ba_raw[1:])
+print(ba_raw[,1:6])
 
 ### add error term two swe calc
 # 10% uncertainty density
