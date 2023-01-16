@@ -70,7 +70,7 @@ ba_location
 ext(locations) # get extent
 shp_ext <-ext(-106.5342, -106.53, 35.8837, 35.889) # make a bit bigger for plotting
 stack_crop <-crop(stack, shp_ext)
-plot(stack_crop[[4]])
+plot(stack[[4]])
 points(sensor_locations, cex = 1)
 points(ba_location, col = 'red')
 
@@ -116,15 +116,15 @@ colnames(ba_feb12_26_dswe)[2] <-"insar_feb12_26_dswe"
 ba_feb12_26_dswe
 
 # rbind BA data to insar change csvs
-feb12_19_dswe_v2 <-rbind(feb12_19_dswe,ba_feb12_19_dswe)
-feb19_26_dswe_v2 <-rbind(feb19_26_dswe,ba_feb19_26_dswe)
+ba_dswe <-cbind(ba_raw, ba_feb12_19_dswe$insar_feb12_19_dswe, 
+                ba_feb19_26_dswe$insar_feb19_26_dswe, ba_feb12_26_dswe$insar_feb12_26_dswe)
 
-
-# rbind BA data to depth change csv
-depth_change_csv_ba <-rbind(depth_change_csv, ba_raw)
+# rename binded colums
+names(ba_dswe)[7:9] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe")
+ba_dswe
 
 # create new df
-depth_change_csv_v2 <-cbind(depth_change_csv_ba, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
+depth_change_csv_v2 <-cbind(depth_change_csv, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
                       feb12_26_dswe$insar_feb12_26_dswe)
 
 
@@ -136,7 +136,7 @@ depth_change_csv_v2
 #### convert depth to SWE for noah's depth sensors
 ##################
 
-swe_df <-depth_change_csv_v2[1:7,] # chop of hidden valley, wacky data
+swe_df <-depth_change_csv_v2[c(-8),] # chop of hidden valley, wacky data
 swe_df
 
 # new snow density, taking from interval board measurements 
@@ -159,23 +159,20 @@ swe_df$feb12_19_dswe <-swe_df$feb12_19*bulk_density
 swe_df$feb12_26_dswe <-swe_df$feb12_26*bulk_density
 swe_df
 
-# add BA pit SWE change to dswe dataframe
-ba <-c(ba_raw[1:])
-print(ba_raw[,1:6])
-
 ### add error term two swe calc
 # 10% uncertainty density
-# 2 cm uncertainty depth
-
-swe_df$feb12_19_dswe_error <-abs(swe_df$feb12_19_dswe)-abs((-2+swe_df$feb12_19)*(bulk_density+(bulk_density*.1)))
-swe_df$feb19_26_dswe_error <-abs(swe_df$feb19_26_dswe)-abs((2+swe_df$feb19_26)*(.24+(.24*.1)))
-swe_df$feb12_26_dswe_error <-abs(swe_df$feb12_26_dswe)-abs((-2+swe_df$feb12_26)*(bulk_density+(bulk_density*.1)))
+# 1 cm uncertainty depth
+swe_df$feb12_19_dswe_error <-abs(swe_df$feb12_19_dswe)-abs((-1+swe_df$feb12_19)*(bulk_density+(bulk_density*.1)))
+swe_df$feb19_26_dswe_error <-abs(swe_df$feb19_26_dswe)-abs((1+swe_df$feb19_26)*(.24+(.24*.1)))
+swe_df$feb12_26_dswe_error <-abs(swe_df$feb12_26_dswe)-abs((-1+swe_df$feb12_26)*(bulk_density+(bulk_density*.1)))
 swe_df
 
 #write.csv(sensor_csv_v2, "/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_insar_swe_change.csv")
 
-#### format df for plotting and anlysis
-# repeat dates so they can be grouped by
+#############################################
+#### format df for plotting and analysis ####
+#############################################
+
 first <-rep(names(swe_df[4]), length = nrow(swe_df)) 
 second <-rep(names(swe_df[5]), length = nrow(swe_df)) 
 third <-rep(names(swe_df[6]), length = nrow(swe_df))
@@ -208,10 +205,31 @@ plotting_df <-cbind(add_date,insar_dswe,insitu_dswe,insitu_error)
 plotting_df
 # write.csv(plotting_df, "/Users/jacktarricone/ch1_jemez_data/climate_station_data/noah/insitu_insar_swe_change_plotting_df.csv")
 
-### add error term two swe calc
-# 10% uncertainty density
-# 2 cm uncertainty depth
+######################
+#### ba formatting ###
+######################
 
+# meta data
+ba_meta <-rbind(ba_dswe[1:3],ba_dswe[1:3],ba_dswe[1:3])
+
+# format BA dataframe for plotting
+date_ba <-c(names(ba_dswe[4]), names(ba_dswe[5]), names(ba_dswe[6])) # make vector
+
+add_data_ba <-cbind(date_ba,ba_meta)
+
+# make swe data column in proper order
+ba_insar_dswe <-c(ba_dswe$insar_feb12_19_dswe,
+               ba_dswe$insar_feb19_26_dswe,
+               ba_dswe$insar_feb12_26_dswe)
+
+# make insitu column
+ba_insitu_dswe <-c(ba_dswe$feb12_19,
+                   ba_dswe$feb19_26,
+                   ba_dswe$feb12_26)
+
+# bind together
+ba_plotting_df <-cbind(add_data_ba,ba_insar_dswe,ba_insitu_dswe)
+ba_plotting_df
 
 ggplot()+
   #geom_point(aes(x=den_P_depth_P, y=depth_change_csv_v2$sensor), color = 'darkred', shape = 4) +
@@ -239,13 +257,15 @@ lm_eqn <- function(df){
   as.character(as.expression(eq));
 }
 
+plotting_df
 # plot
-p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
+p <-ggplot(plotting_df[1:8], aes(x = insitu_dswe, y = insar_dswe)) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
   geom_smooth(method = "lm", se = FALSE)+
   geom_errorbar(aes(y= insar_dswe, xmin=insitu_dswe-abs(insitu_error), xmax=insitu_dswe+abs(insitu_error)), 
                  width=0.1, colour = 'black', alpha=0.4, size=.5) +
-  geom_point(aes(color = date)) + 
+  geom_point(aes(color = date)) +
+  geom_point(data = ba_dswe, aes())+  
   scale_y_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
   scale_x_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
   ylab(Delta~"SWE InSAR (cm)") + xlab(Delta~"SWE In Situ (cm)") +
@@ -263,7 +283,7 @@ print(p1)
 
 
 # save image, doesnt like back slahes in the name bc it's a file path... idk
-ggsave("./plots/in_situ_insar_fig12.pdf",
+ggsave("./plots/in_situ_insar_fig12_BA.pdf",
         width = 5, 
         height = 5,
         units = "in",
