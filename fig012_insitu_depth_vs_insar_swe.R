@@ -215,6 +215,7 @@ ba_meta <-rbind(ba_dswe[1:3],ba_dswe[1:3],ba_dswe[1:3])
 # format BA dataframe for plotting
 date_ba <-c(names(ba_dswe[4]), names(ba_dswe[5]), names(ba_dswe[6])) # make vector
 
+# bind
 add_data_ba <-cbind(date_ba,ba_meta)
 
 # make swe data column in proper order
@@ -231,6 +232,11 @@ ba_insitu_dswe <-c(ba_dswe$feb12_19,
 ba_plotting_df <-cbind(add_data_ba,ba_insar_dswe,ba_insitu_dswe)
 ba_plotting_df
 
+
+#####################
+##### build plot ####
+#####################
+
 ggplot()+
   #geom_point(aes(x=den_P_depth_P, y=depth_change_csv_v2$sensor), color = 'darkred', shape = 4) +
   #geom_point(aes(x=den_M_depth_M, y=depth_change_csv_v2$sensor), color = 'darkblue', shape = 4) +
@@ -245,7 +251,14 @@ my_colors <-c('darkgreen', 'plum', 'goldenrod')
 
 # create new df for lm and plotting on graph
 lm_df <-plotting_df[-c(1:4)]
-names(lm_df)[1:2] <-c("x","y")
+
+# add ba pit data 
+ba_dat <-cbind(ba_plotting_df[-c(1:4)],rep("NA",3))
+colnames(ba_dat) <-colnames(lm_df) 
+
+# bbind
+lm_df_v2 <-rbind(lm_df, ba_dat)
+names(lm_df_v2)[1:2] <-c("x","y")
 
 # function for running lm, plotting equation and r2 
 lm_eqn <- function(df){
@@ -257,15 +270,13 @@ lm_eqn <- function(df){
   as.character(as.expression(eq));
 }
 
-plotting_df
 # plot
-p <-ggplot(plotting_df[1:8], aes(x = insitu_dswe, y = insar_dswe)) +
+p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
   geom_smooth(method = "lm", se = FALSE)+
   geom_errorbar(aes(y= insar_dswe, xmin=insitu_dswe-abs(insitu_error), xmax=insitu_dswe+abs(insitu_error)), 
                  width=0.1, colour = 'black', alpha=0.4, size=.5) +
-  geom_point(aes(color = date)) +
-  geom_point(data = ba_dswe, aes())+  
+  geom_point(aes(color = date)) +  
   scale_y_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
   scale_x_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
   ylab(Delta~"SWE InSAR (cm)") + xlab(Delta~"SWE In Situ (cm)") +
@@ -278,8 +289,13 @@ p <-ggplot(plotting_df[1:8], aes(x = insitu_dswe, y = insar_dswe)) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
   theme(legend.position = c(.83,.2))
 
-p1 <- p + geom_text(x = -2.5, y = 4, label = lm_eqn(lm_df), parse = TRUE)
-print(p1)
+p2 <- p + geom_point(data = ba_plotting_df, aes(x = ba_insitu_dswe, y = ba_insar_dswe), 
+                     color = my_colors, shape = 8, size = 4)  
+
+print(p2)
+
+p3 <- p2 + geom_text(x = -2.5, y = 4, label = lm_eqn(lm_df_v2), parse = TRUE)
+print(p3)
 
 
 # save image, doesnt like back slahes in the name bc it's a file path... idk
