@@ -3,9 +3,10 @@
 # jack tarricone
 
 library(terra)
-library(ggplot2);theme_set(theme_classic(12))
+library(ggplot2)
 library(dplyr)
 library(sf)
+library(Metrics)
 
 # set custom theme
 theme_classic <- function(base_size = 11, base_family = "",
@@ -36,6 +37,8 @@ theme_classic <- function(base_size = 11, base_family = "",
       complete = TRUE
     )
 }
+
+theme_set(theme_classic(14))
 
 setwd("/Users/jacktarricone/ch1_jemez/")
 
@@ -237,15 +240,6 @@ ba_plotting_df
 ##### build plot ####
 #####################
 
-ggplot()+
-  #geom_point(aes(x=den_P_depth_P, y=depth_change_csv_v2$sensor), color = 'darkred', shape = 4) +
-  #geom_point(aes(x=den_M_depth_M, y=depth_change_csv_v2$sensor), color = 'darkblue', shape = 4) +
-  #geom_point(aes(x=den_M_depth_M, y=depth_change_csv_v2$sensor), color = 'darkgreen', shape = 4) +
-  #geom_point(aes(x=den_P_depth_M, y=depth_change_csv_v2$sensor), color = 'violet', shape = 4) +
-  geom_point(aes(x=normal, y=depth_change_csv_v2$sensor), color = 'black') +
-  geom_errorbar(aes(y=depth_change_csv_v2$sensor, xmin=normal+1, xmax=normal-1), 
-                  width=0.1, colour="orange", alpha=0.9, size=.5)
-  
 ## new plot
 my_colors <-c('darkgreen', 'plum', 'goldenrod')
 
@@ -270,6 +264,7 @@ lm_eqn <- function(df){
   as.character(as.expression(eq));
 }
 
+
 # plot
 p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
@@ -277,15 +272,15 @@ p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   geom_errorbar(aes(y= insar_dswe, xmin=insitu_dswe-abs(insitu_error), xmax=insitu_dswe+abs(insitu_error)), 
                  width=0.1, colour = 'black', alpha=0.4, size=.5) +
   geom_point(aes(color = date)) +  
-  scale_y_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
-  scale_x_continuous(limits = c(-6,6),breaks = c(seq(-6,6,2))) +
+  scale_y_continuous(limits = c(-6,6),breaks = c(seq(-6,6,1)),expand = (c(0,0))) +
+  scale_x_continuous(limits = c(-6,6),breaks = c(seq(-6,6,1)),expand = (c(0,0))) +
   ylab(Delta~"SWE InSAR (cm)") + xlab(Delta~"SWE In Situ (cm)") +
   scale_color_manual(name = "InSAR Pair",
                      values = my_colors,
                      breaks = c('feb12_19', 'feb19_26', 'feb12_26'),
                      labels = c('Feb. 12-19', 'Feb. 19-26', 'Feb. 12-26'))+
   scale_fill_discrete(breaks=c('B', 'C', 'A'))  +
-  theme_classic(12) +
+  theme_classic(15) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
   theme(legend.position = c(.83,.2))
 
@@ -294,16 +289,34 @@ p2 <- p + geom_point(data = ba_plotting_df, aes(x = ba_insitu_dswe, y = ba_insar
 
 print(p2)
 
-p3 <- p2 + geom_text(x = -2.5, y = 4, label = lm_eqn(lm_df_v2), parse = TRUE)
-print(p3)
+# stats
+# function for running lm, plotting equation and r2 
+lm_eqn <- function(df){
+  m <- lm(y ~ x, df);
+  eq <- substitute(bold(y == a + b %.% x*","~~r^2~"="~r2),
+                   list(a = format(unname(coef(m)[1]), digits = 2),
+                        b = format(unname(coef(m)[2]), digits = 2),
+                        r2 = format(summary(m)$r.squared, digits = 2)))
+  as.character(as.expression(eq));
+}
 
+# labels
+
+rmse_lab <-paste0("RMSE = ",rmse," cm")
+mae_lab <-paste0("MAE = ",mae," cm") 
+
+test_lab <-"bold(y == \"-0.15\" + \"0.74\" %.% x * \",\" ~ ~r^2 ~ \"=\" ~ \"0.42\" )"
+
+p3 <- p2 + geom_label(x = -2.5, y = 4, label = lm_eqn(lm_df_v2), parse = TRUE, label.size = NA, fontface = "bold") +
+           geom_label(x = -2.5, y = 3.3, label = rmse_lab, label.size = NA, fontface = "bold") +
+           geom_label(x = -2.5, y = 2.6, label = mae_lab, label.size = NA, fontface = "bold") 
+print(p3)
 
 # save image, doesnt like back slahes in the name bc it's a file path... idk
 ggsave("./plots/in_situ_insar_fig12_BA.pdf",
         width = 5, 
         height = 5,
         units = "in",
-        dpi = 400)
-
+        dpi = 500)
 
 
