@@ -4,6 +4,7 @@
 
 library(terra)
 library(ggplot2)
+library(cowplot)
 library(dplyr)
 library(sf)
 library(Metrics)
@@ -272,8 +273,8 @@ p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   geom_errorbar(aes(y= insar_dswe, xmin=insitu_dswe-abs(insitu_error), xmax=insitu_dswe+abs(insitu_error)), 
                  width=0.1, colour = 'black', alpha=0.4, size=.5) +
   geom_point(aes(color = date)) +  
-  scale_y_continuous(limits = c(-6,6),breaks = c(seq(-6,6,1)),expand = (c(0,0))) +
-  scale_x_continuous(limits = c(-6,6),breaks = c(seq(-6,6,1)),expand = (c(0,0))) +
+  scale_y_continuous(limits = c(-10,10),breaks = c(seq(-10,10,2)),expand = (c(0,0))) +
+  scale_x_continuous(limits = c(-10,10),breaks = c(seq(-10,10,2)),expand = (c(0,0))) +
   ylab(Delta~"SWE InSAR (cm)") + xlab(Delta~"SWE In Situ (cm)") +
   scale_color_manual(name = "InSAR Pair",
                      values = my_colors,
@@ -282,7 +283,7 @@ p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   scale_fill_discrete(breaks=c('B', 'C', 'A'))  +
   theme_classic(15) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
-  theme(legend.position = c(.83,.2))
+  theme(legend.position = c(.2,.78))
 
 p2 <- p + geom_point(data = ba_plotting_df, aes(x = ba_insitu_dswe, y = ba_insar_dswe), 
                      color = my_colors, shape = 8, size = 4)  
@@ -300,23 +301,123 @@ lm_eqn <- function(df){
   as.character(as.expression(eq));
 }
 
-# labels
-
+# create stats and make text labesl
+rmse <-round(rmse(lm_df_v2$x, lm_df_v2$y), digits = 2)
+mae <-round(mae(lm_df_v2$x, lm_df_v2$y), digits = 2)
 rmse_lab <-paste0("RMSE = ",rmse," cm")
 mae_lab <-paste0("MAE = ",mae," cm") 
 
-test_lab <-"bold(y == \"-0.15\" + \"0.74\" %.% x * \",\" ~ ~r^2 ~ \"=\" ~ \"0.42\" )"
+# add labels
+insitu <- p2 + geom_label(x = 3.5, y = -4.5, label = lm_eqn(lm_df_v2), parse = TRUE, label.size = NA, fontface = "bold") +
+           geom_label(x = 3.5, y = -5.5, label = rmse_lab, label.size = NA, fontface = "bold") +
+           geom_label(x = 3.5, y = -6.5, label = mae_lab, label.size = NA, fontface = "bold") 
 
-p3 <- p2 + geom_label(x = -2.5, y = 4, label = lm_eqn(lm_df_v2), parse = TRUE, label.size = NA, fontface = "bold") +
-           geom_label(x = -2.5, y = 3.3, label = rmse_lab, label.size = NA, fontface = "bold") +
-           geom_label(x = -2.5, y = 2.6, label = mae_lab, label.size = NA, fontface = "bold") 
-print(p3)
+print(insitu)
 
 # save image, doesnt like back slahes in the name bc it's a file path... idk
-ggsave("./plots/in_situ_insar_fig12_BA.pdf",
-        width = 5, 
-        height = 5,
-        units = "in",
-        dpi = 500)
+# ggsave("./plots/in_situ_insar_fig12_BA.pdf",
+#         width = 5, 
+#         height = 5,
+#         units = "in",
+#         dpi = 500)
+
+######################################
+######################################
+############### gpr ##################
+######################################
+######################################
+
+setwd("/Users/jacktarricone/ch1_jemez/")
+
+#######
+#######
+## read in swe change data
+dswe <-rast("./gpr_rasters_ryan/new_swe_change/dswe_feb12-26_sp.tif") # 
+dswe_cm <-rast("./gpr_rasters_ryan/new_swe_change/dswe_feb12-26_cumulative.tif") # cumulative insar pair
+dswe
+dswe_cm
+
+# bring in 2/12-2/26 gpr data
+gpr_feb26_minus_feb12_v1 <-rast("./gpr_swe_bias/feb26_minus_Feb12_bias_corrected1.tif")
+gpr_feb26_minus_feb12 <-gpr_feb26_minus_feb12_v1/10 # convert to cm from mm
+plot(gpr_feb26_minus_feb12)
+hist(gpr_feb26_minus_feb12, breaks = 50)
+#global(gpr_feb26_minus_feb12,mean,na.rm=T)
+
+# resample gpr to same grid as unw, crop ext
+dswe_crop <-crop(dswe, ext(gpr_feb26_minus_feb12)) # crop
+dswe_cm_crop <-crop(dswe_cm, ext(gpr_feb26_minus_feb12)) # crop
+gpr_feb26_minus_feb12 # check
+dswe_crop # check
+dswe_cm_crop # check
+
+# test plot
+plot(dswe_crop)
+plot(dswe_cm_crop)
+plot(gpr_feb26_minus_feb12, add = TRUE, col = "red")
+
+# mask unw data with gpr
+dswe_crop_mask <-mask(dswe_crop, gpr_feb26_minus_feb12, maskvalue = NA)
+dswe_cm_crop_mask_v1 <-mask(dswe_cm_crop, gpr_feb26_minus_feb12, maskvalue = NA)
+dswe_cm_crop_mask <-mask(dswe_cm_crop_mask_v1, dswe_crop_mask, maskvalue = NA)
+f26_m_12_mask <-mask(gpr_feb26_minus_feb12, dswe_crop_mask, maskvalue = NA)
+
+# plot only pixels that have data for both gpr and unw
+plot(dswe_crop_mask)
+plot(dswe_cm_crop_mask)
+plot(f26_m_12_mask, add = TRUE, col = hcl.colors(12, "Berlin"))
+
+# convert raster to dataframe
+df <-as.data.frame(dswe_crop_mask, xy = TRUE, cells = TRUE, na.rm = TRUE)
+cm_df <-as.data.frame(dswe_cm_crop_mask, xy = TRUE, cells = TRUE, na.rm = TRUE)
+gpr_df <-as.data.frame(f26_m_12_mask, xy = TRUE, cells = TRUE, na.rm = TRUE)
+head(gpr_df)
+head(cm_df)
+
+# bind the data frames
+plotting_df_gpr <-cbind(df, cm_df[,4] ,gpr_df[,4])
+head(plotting_df_gpr)
+colnames(plotting_df_gpr)[4] <- "dswe_insar_isce" # rename col 4
+colnames(plotting_df_gpr)[5] <- "dswe_insar_cm" # rename col 5
+colnames(plotting_df_gpr)[6] <- "dswe_gpr" # rename col 6
+head(plotting_df_gpr)
+
+# quick hists
+hist(plotting_df_gpr$dswe_gpr, breaks = 20)
+hist(plotting_df_gpr$dswe_insar_isce, breaks = 20)
+hist(plotting_df_gpr$dswe_insar_cm, breaks = 20)
+
+####
+# plotting
+####
+gpr <-ggplot(plotting_df_gpr) +
+  geom_abline(intercept = 0, slope = 1, linetype = 2) +
+  scale_y_continuous(limits = c(-10,10),breaks = c(seq(-10,10,2)),expand = (c(0,0))) +
+  scale_x_continuous(limits = c(-10,10),breaks = c(seq(-10,10,2)),expand = (c(0,0))) +
+  geom_point(aes(y = dswe_insar_isce, x = dswe_gpr, color = "isce"), alpha = .5, size = 1) +
+  geom_point(aes(y = dswe_insar_cm, x = dswe_gpr, color = "cm"), alpha = .5, size = 1) +
+  scale_color_manual(name = "InSAR Pair",
+                     values = c('isce' = 'darkviolet', 'cm' = 'goldenrod'),
+                     labels = c('12-26 Feb.', '12-26 Feb. CM'))+
+  labs(x = Delta~"SWE GPR (cm)",
+       y = Delta~"SWE InSAR (cm)")+
+  theme_classic(14) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
+  theme(legend.position = c(.2,.83))
+
+# stack with cow plot
+plot_grid(insitu, gpr,
+          labels = c("(a)","(b)"),
+          align = "v", 
+          nrow = 2, 
+          rel_heights = c(1/2, 1/2))
+
+ggsave("./plots/gpr_insitu_stack.pdf",
+       width = 5, 
+       height = 10,
+       units = "in",
+       dpi = 500)
+
+
 
 
