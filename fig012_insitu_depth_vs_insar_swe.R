@@ -308,9 +308,9 @@ rmse_lab <-paste0("RMSE = ",rmse," cm")
 mae_lab <-paste0("MAE = ",mae," cm") 
 
 # add labels
-insitu <- p2 + geom_label(x = 3.5, y = -4.5, label = lm_eqn(lm_df_v2), parse = TRUE, label.size = NA, fontface = "bold") +
-           geom_label(x = 3.5, y = -5.5, label = rmse_lab, label.size = NA, fontface = "bold") +
-           geom_label(x = 3.5, y = -6.5, label = mae_lab, label.size = NA, fontface = "bold") 
+insitu <- p2 + geom_label(x = 4, y = -4.5, label = lm_eqn(lm_df_v2), parse = TRUE, label.size = NA, fontface = "bold") +
+           geom_label(x = 4, y = -5.8, label = rmse_lab, label.size = NA, fontface = "bold") +
+           geom_label(x = 4, y = -7.1, label = mae_lab, label.size = NA, fontface = "bold") 
 
 print(insitu)
 
@@ -401,9 +401,9 @@ gpr <-ggplot(plotting_df_gpr) +
                      labels = c('12-26 Feb.', '12-26 Feb. CM'))+
   labs(x = Delta~"SWE GPR (cm)",
        y = Delta~"SWE InSAR (cm)")+
-  theme_classic(14) +
+  theme_classic(15) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
-  theme(legend.position = c(.2,.83))
+  theme(legend.position = c(.25,.78))
 
 # stack with cow plot
 plot_grid(insitu, gpr,
@@ -414,7 +414,7 @@ plot_grid(insitu, gpr,
 
 ggsave("./plots/gpr_insitu_stack.pdf",
        width = 5, 
-       height = 10,
+       height = 9,
        units = "in",
        dpi = 500)
 
