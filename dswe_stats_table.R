@@ -1,6 +1,7 @@
 # make swe change stats table for manuscript
+# add vg, north, and south stats
 # jack tarricone
-# july 18th, 2022
+# jan 16th, 2022
 
 library(terra)
 
@@ -49,29 +50,29 @@ p3_vg <-mask(p3, vg)
 p4_vg <-mask(p4, vg)
 
 # crop for north facing slopes
-p1_north_v1 <-mask(p1, ns_no_vg, maskvalue = 1) # north = 1
+p1_north_v1 <-mask(p1, ns_no_vg, maskvalue = 2) # 2 = south, therefore masking for 2 will leave north
 p1_north <-mask(p1_north_v1, vg, inverse = TRUE)
 
-p2_north_v1 <-mask(p2, ns_no_vg, maskvalue = 1) # north = 1
+p2_north_v1 <-mask(p2, ns_no_vg, maskvalue = 2) 
 p2_north <-mask(p2_north_v1, vg, inverse = TRUE)
 
-p3_north_v1 <-mask(p3, ns_no_vg, maskvalue = 1) # north = 1
+p3_north_v1 <-mask(p3, ns_no_vg, maskvalue = 2) 
 p3_north <-mask(p3_north_v1, vg, inverse = TRUE)
 
-p4_north_v1 <-mask(p4, ns_no_vg, maskvalue = 1) # north = 1
+p4_north_v1 <-mask(p4, ns_no_vg, maskvalue = 2) 
 p4_north <-mask(p4_north_v1, vg, inverse = TRUE)
 
 # crop for south facing slopes
-p1_south_v1 <-mask(p1, ns_no_vg, maskvalue = 2) # south = 1
+p1_south_v1 <-mask(p1, ns_no_vg, maskvalue = 1) # 1 = north, therefore masking for 1 will leave south
 p1_south <-mask(p1_south_v1, vg, inverse = TRUE)
 
-p2_south_v1 <-mask(p2, ns_no_vg, maskvalue = 2) # south = 1
+p2_south_v1 <-mask(p2, ns_no_vg, maskvalue = 1) 
 p2_south <-mask(p2_south_v1, vg, inverse = TRUE)
 
-p3_south_v1 <-mask(p3, ns_no_vg, maskvalue = 2) # south = 1
+p3_south_v1 <-mask(p3, ns_no_vg, maskvalue = 1)
 p3_south <-mask(p3_south_v1, vg, inverse = TRUE)
 
-p4_south_v1 <-mask(p4, ns_no_vg, maskvalue = 2) # south = 1
+p4_south_v1 <-mask(p4, ns_no_vg, maskvalue = 1) #
 p4_south <-mask(p4_south_v1, vg, inverse = TRUE)
 
 
@@ -203,7 +204,7 @@ fs_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
 
 fs_stats # check
 
-# write.csv(fs_stats, "/Users/jacktarricone/ch1_jemez/pit_data/full_scene_swe_stats.csv")
+write.csv(fs_stats, "/Users/jacktarricone/ch1_jemez/pit_data/full_scene_swe_stats.csv")
 
 ##############
 ###   vg   ###
@@ -275,7 +276,7 @@ vg_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
 
 vg_stats # check
 
-# write.csv(vg_stats, "/Users/jacktarricone/ch1_jemez/pit_data/vg_swe_stats.csv")
+write.csv(vg_stats, "/Users/jacktarricone/ch1_jemez/pit_data/vg_swe_stats.csv")
 
 ##############
 ### north  ###
@@ -347,7 +348,7 @@ north_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
 
 north_stats # check
 
-# write.csv(north_stats, "/Users/jacktarricone/ch1_jemez/pit_data/north_swe_stats.csv")
+write.csv(north_stats, "/Users/jacktarricone/ch1_jemez/pit_data/north_swe_stats.csv")
 
 ##############
 ### south  ###
@@ -418,10 +419,7 @@ south_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
                          "sd" = c(p1_sd_south, p2_sd_south, p3_sd_south, p4_sd_south))
 
 south_stats # check
-north_stats
 
 write.csv(south_stats, "/Users/jacktarricone/ch1_jemez/pit_data/south_swe_stats.csv")
-
-
 
 
