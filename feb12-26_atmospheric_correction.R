@@ -73,7 +73,7 @@ snow_mask_raw <-rast("./gpr_rasters_ryan/landsat_fsca_2-18.tif")
 plot(snow_mask_raw)
 
 # clip edges off no snow mask to make it same size as plv and unw
-sm_v1 <-resample(snow_mask_raw, unw_v1)
+sm_v1 <-resample(snow_mask_raw, unw_masked)
 snow_mask <-mask(sm_v1, unw_raw, maskvalue = NA)
 plot(snow_mask)
 
@@ -95,7 +95,7 @@ colnames(unw_df)[4] <- "unwrapped_phase"
 head(unw_df)
 hist(unw_df$unwrapped_phase, breaks = 100) #quick hist to check
 
-#plv
+# plv
 plv_df <-as.data.frame(snow_plv, xy=TRUE, cells=TRUE, na.rm=TRUE)
 colnames(plv_df)[4] <- "plv_km"
 head(plv_df)
@@ -258,15 +258,6 @@ p9 <-ggplot(plotting_df, aes(plv_km, unwrapped_phase)) +
 
 print(p9)
 
-setwd("/saving/location/")
-# ggsave(p9,
-          # file = "feb12-26_nosnow_vs_plv_no_title.png",
-          # width = 5, 
-          # height = 5,
-          # dpi = 400)
-
-
-### correct unw data using path length and the linear estimation we generated
 
 path_length_correction <-function(unw, plv){
    atm_corrected <-unw - ((plv * coef(lm_fit)[[2]]) + coef(lm_fit)[[1]])
@@ -276,12 +267,12 @@ path_length_correction <-function(unw, plv){
 # save original
 unw_corrected <-path_length_correction(unw_raw, plv_unw_mask)
 plot(unw_corrected)
-writeRaster(unw_corrected, "unw_corrected_feb12-26.tif")
+# writeRaster(unw_corrected, "unw_corrected_feb12-26.tif")
 
 # snow mask
 snow_unw_corrected <-mask(unw_corrected, snow_mask)
 plot(snow_unw_corrected)
-writeRaster(snow_unw_corrected, "snow_unw_corrected_feb12-26.tif")
+# writeRaster(snow_unw_corrected, "snow_unw_corrected_feb12-26.tif")
 
 
 ###################
@@ -305,8 +296,8 @@ p13 <-ggplot(unw_corrected_df, aes(x, unwrapped_phase)) +
 print(p13)
 
 
-ggsave(p13,
-       file = "jemez_phase_corrected_12-26.png",
-       width = 6, 
-       height = 4,
-       dpi = 400)
+# ggsave(p13,
+#        file = "jemez_phase_corrected_12-26.png",
+#        width = 6, 
+#        height = 4,
+#        dpi = 400)

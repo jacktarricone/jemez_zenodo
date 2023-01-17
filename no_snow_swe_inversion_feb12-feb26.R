@@ -108,7 +108,7 @@ devtools::source_url("https://raw.githubusercontent.com/jacktarricone/snowex_uav
 # }
 
 # testing
-depth_change <-depth_from_phase(delta_phase = unw_snow_mask,
+depth_change <-depth_from_phase(delta_phase = unw,
                                 inc_angle = lidar_inc,
                                 perm = mean_k_feb12_26,
                                 wavelength = uavsar_wL)
@@ -169,5 +169,37 @@ dswe_abs <-dswe_raw - mean_pit_dswe
 plot(dswe_abs)
 hist(dswe_abs, breaks = 100)
 
+# mask for no snow areas
+dswe_no_snow <-mask(dswe_abs, unw_no_snow_mask, maskvalue = NA)
+dswe_snow <-mask(dswe_abs, unw_snow_mask, maskvalue = NA)
+plot(dswe_no_snow)
+hist(dswe_no_snow, breaks = 100)
+hist(dswe_snow, breaks = 100)
+
+# mean
+mean_snow <-global(dswe_no_snow, mean, na.rm = TRUE)
+mean_no <-global(dswe_snow, mean, na.rm = TRUE)
+
+# sd
+sd_snow <-global(dswe_no_snow, sd, na.rm = TRUE)
+sd_now <-global(dswe_snow, sd, na.rm = TRUE)
+
+# max
+max_snow <-global(dswe_no_snow, max, na.rm = TRUE)
+max_no <-global(dswe_snow, max, na.rm = TRUE)
+
+# min
+min_snow <-global(dswe_no_snow, min, na.rm = TRUE)
+min_no <-global(dswe_snow, min, na.rm = TRUE)
+
+# range
+range_snow <-global(dswe_no_snow, range, na.rm = TRUE)
+range_no <-global(dswe_snow, range, na.rm = TRUE)
+
+# rms
+rms_snow <-global(dswe_no_snow, "rms", na.rm = TRUE)
+rms_no <-global(dswe_snow, "rms", na.rm = TRUE)
+
+
 # save
-writeRaster(dswe_abs,"./new_swe_change/rough/dswe_feb12-26_new.tif")
+writeRaster(dswe_abs,"./new_swe_change/rough/no_snow_dswe_feb12-26_new.tif")

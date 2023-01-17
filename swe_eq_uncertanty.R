@@ -74,3 +74,12 @@ head(dswe_vg_df)
 mean_vg <-mean(dswe_vg_df$dswe)
 sd_vg <-sd(dswe_vg_df$dswe)
 
+library(boot)
+rsq <- function(formula, data, indices) {
+  d <- data[indices,] # allows boot to select sample
+  fit <- lm(formula, data=d)
+  return(summary(fit)$r.square)
+}
+results <- boot(data=dswe_vg_df$dsw, statistic=rsq,
+                R=1000, formula=mpg~wt+disp)
+boot.ci(results, type="bca")
