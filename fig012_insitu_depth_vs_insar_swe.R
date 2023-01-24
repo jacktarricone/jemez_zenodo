@@ -41,6 +41,7 @@ theme_classic <- function(base_size = 11, base_family = "",
 
 theme_set(theme_classic(14))
 
+# set dir
 setwd("/Users/jacktarricone/ch1_jemez/")
 
 #######
@@ -246,19 +247,22 @@ my_colors <-c('darkgreen', 'plum', 'goldenrod')
 
 # create new df for lm and plotting on graph
 lm_df <-plotting_df[-c(1:4)]
+lm_df
 
 # add ba pit data 
 ba_dat <-cbind(ba_plotting_df[-c(1:4)],rep("NA",3))
 colnames(ba_dat) <-colnames(lm_df) 
+ba_dat
 
 # bbind
 lm_df_v2 <-rbind(lm_df, ba_dat)
-names(lm_df_v2)[1:2] <-c("x","y")
+names(lm_df_v2)[1:2] <-c("y","x") # y = insar, x = insitu
 
+# stats
 # function for running lm, plotting equation and r2 
 lm_eqn <- function(df){
   m <- lm(y ~ x, df);
-  eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2,
+  eq <- substitute(bold(y == a + b %.% x*","~~r^2~"="~r2),
                    list(a = format(unname(coef(m)[1]), digits = 2),
                         b = format(unname(coef(m)[2]), digits = 2),
                         r2 = format(summary(m)$r.squared, digits = 2)))
@@ -266,10 +270,11 @@ lm_eqn <- function(df){
 }
 
 
+
 # plot
 p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  geom_smooth(method = "lm", se = FALSE)+
+  geom_smooth(method = "lm", se = FALSE) +
   geom_errorbar(aes(y= insar_dswe, xmin=insitu_dswe-abs(insitu_error), xmax=insitu_dswe+abs(insitu_error)), 
                  width=0.1, colour = 'black', alpha=0.4, size=.5) +
   geom_point(aes(color = date)) +  
@@ -290,16 +295,6 @@ p2 <- p + geom_point(data = ba_plotting_df, aes(x = ba_insitu_dswe, y = ba_insar
 
 print(p2)
 
-# stats
-# function for running lm, plotting equation and r2 
-lm_eqn <- function(df){
-  m <- lm(y ~ x, df);
-  eq <- substitute(bold(y == a + b %.% x*","~~r^2~"="~r2),
-                   list(a = format(unname(coef(m)[1]), digits = 2),
-                        b = format(unname(coef(m)[2]), digits = 2),
-                        r2 = format(summary(m)$r.squared, digits = 2)))
-  as.character(as.expression(eq));
-}
 
 # create stats and make text labesl
 rmse <-round(rmse(lm_df_v2$x, lm_df_v2$y), digits = 2)
@@ -390,20 +385,40 @@ hist(plotting_df_gpr$dswe_insar_cm, breaks = 20)
 ####
 # plotting
 ####
-gpr <-ggplot(plotting_df_gpr) +
+gpr <-ggplot(plotting_df_gpr, aes(y = dswe_insar_isce, x = dswe_gpr)) +
+  geom_smooth(method = "lm", se = FALSE) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
   scale_y_continuous(limits = c(-10,10),breaks = c(seq(-10,10,2)),expand = (c(0,0))) +
   scale_x_continuous(limits = c(-10,10),breaks = c(seq(-10,10,2)),expand = (c(0,0))) +
-  geom_point(aes(y = dswe_insar_isce, x = dswe_gpr, color = "isce"), alpha = .5, size = 1) +
-  geom_point(aes(y = dswe_insar_cm, x = dswe_gpr, color = "cm"), alpha = .5, size = 1) +
+  geom_point(aes(color = "isce"), alpha = .5, size = 1) +
   scale_color_manual(name = "InSAR Pair",
-                     values = c('isce' = 'darkviolet', 'cm' = 'goldenrod'),
-                     labels = c('12-26 Feb.', '12-26 Feb. CM'))+
+                     values = c('isce' = 'goldenrod'),
+                     labels = c('12-26 Feb.'))+
   labs(x = Delta~"SWE GPR (cm)",
        y = Delta~"SWE InSAR (cm)")+
   theme_classic(15) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
   theme(legend.position = c(.25,.78))
+
+plot(gpr)
+
+# create stats and make text labesl
+rmse_v2 <-round(rmse(plotting_df_gpr$dswe_gpr, plotting_df_gpr$dswe_insar_isce), digits = 2)
+mae_v2 <-round(mae(plotting_df_gpr$dswe_gpr, plotting_df_gpr$dswe_insar_isce), digits = 2)
+rmse_lab_v2 <-paste0("RMSE = ",rmse_v2," cm")
+mae_lab_v2 <-paste0("MAE = ",mae_v2," cm") 
+
+# make gpr lm df
+lm_df_gpr <-plotting_df_gpr[-c(1:3,5)]
+lm_df_gpr
+names(lm_df_gpr)[1:2] <-c("y","x") # y = insar, x = gpr
+
+# add labels
+gpr_v2 <- gpr + geom_label(x = 4, y = -4.5, label = lm_eqn(lm_df_gpr), parse = TRUE, label.size = NA, fontface = "bold") +
+  geom_label(x = 4, y = -5.8, label = rmse_lab_v2, label.size = NA, fontface = "bold") +
+  geom_label(x = 4, y = -7.1, label = mae_lab_v2, label.size = NA, fontface = "bold") 
+
+plot(gpr_v2)
 
 # stack with cow plot
 plot_grid(insitu, gpr,
