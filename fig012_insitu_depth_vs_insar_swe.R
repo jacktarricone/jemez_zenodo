@@ -287,8 +287,8 @@ p <-ggplot(plotting_df, aes(x = insitu_dswe, y = insar_dswe)) +
                      labels = c('Feb. 12-19', 'Feb. 19-26', 'Feb. 12-26'))+
   scale_fill_discrete(breaks=c('B', 'C', 'A'))  +
   theme_classic(15) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
-  theme(legend.position = c(.2,.78))
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth =1)) +
+  theme(legend.position = c(.80,.20))
 
 p2 <- p + geom_point(data = ba_plotting_df, aes(x = ba_insitu_dswe, y = ba_insar_dswe), 
                      color = my_colors, shape = 8, size = 4)  
@@ -303,9 +303,9 @@ rmse_lab <-paste0("RMSE = ",rmse," cm")
 mae_lab <-paste0("MAE = ",mae," cm") 
 
 # add labels
-insitu <- p2 + geom_label(x = 4, y = -4.5, label = lm_eqn(lm_df_v2), parse = TRUE, label.size = NA, fontface = "bold") +
-           geom_label(x = 4, y = -5.8, label = rmse_lab, label.size = NA, fontface = "bold") +
-           geom_label(x = 4, y = -7.1, label = mae_lab, label.size = NA, fontface = "bold") 
+insitu <- p2 + geom_label(x = -5, y = 4.5, label = lm_eqn(lm_df_v2), parse = TRUE, label.size = NA, fontface = "bold") +
+           geom_label(x = -5, y = 5.8, label = rmse_lab, label.size = NA, fontface = "bold") +
+           geom_label(x = -5, y = 7.1, label = mae_lab, label.size = NA, fontface = "bold") 
 
 print(insitu)
 
@@ -398,7 +398,7 @@ gpr <-ggplot(plotting_df_gpr, aes(y = dswe_insar_isce, x = dswe_gpr)) +
        y = Delta~"SWE InSAR (cm)")+
   theme_classic(15) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1)) +
-  theme(legend.position = c(.25,.78))
+  theme(legend.position = c(.80,.15))
 
 plot(gpr)
 
@@ -410,24 +410,24 @@ mae_lab_v2 <-paste0("MAE = ",mae_v2," cm")
 
 # make gpr lm df
 lm_df_gpr <-plotting_df_gpr[-c(1:3,5)]
-lm_df_gpr
+head(lm_df_gpr)
 names(lm_df_gpr)[1:2] <-c("y","x") # y = insar, x = gpr
 
 # add labels
-gpr_v2 <- gpr + geom_label(x = 4, y = -4.5, label = lm_eqn(lm_df_gpr), parse = TRUE, label.size = NA, fontface = "bold") +
-  geom_label(x = 4, y = -5.8, label = rmse_lab_v2, label.size = NA, fontface = "bold") +
-  geom_label(x = 4, y = -7.1, label = mae_lab_v2, label.size = NA, fontface = "bold") 
+gpr_v2 <- gpr + geom_label(x = -5, y = 5.5, label = lm_eqn(lm_df_gpr), parse = TRUE, label.size = NA, fontface = "bold") +
+  geom_label(x = -5, y = 6.8, label = rmse_lab_v2, label.size = NA, fontface = "bold") +
+  geom_label(x = -5, y = 8.1, label = mae_lab_v2, label.size = NA, fontface = "bold") 
 
 plot(gpr_v2)
 
 # stack with cow plot
-plot_grid(insitu, gpr,
+plot_grid(insitu, gpr_v2,
           labels = c("(a)","(b)"),
           align = "v", 
           nrow = 2, 
           rel_heights = c(1/2, 1/2))
 
-ggsave("./plots/gpr_insitu_stack.pdf",
+ggsave("./plots/gpr_insitu_stack_v2.pdf",
        width = 5, 
        height = 9,
        units = "in",
