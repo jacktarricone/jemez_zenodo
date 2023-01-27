@@ -64,6 +64,7 @@ sensor_locations
 # bring snow depth sensor locations shapefile for cropping
 loc_raw <-vect("./climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
 locations <-project(loc_raw, crs(stack))
+locations
 
 # bring in BA it change data
 ba_raw <-read.csv("./pit_data/ba_swe_change.csv")
@@ -303,9 +304,9 @@ rmse_lab <-paste0("RMSE = ",rmse," cm")
 mae_lab <-paste0("MAE = ",mae," cm") 
 
 # add labels
-insitu <- p2 + geom_label(x = -5, y = 4.5, label = lm_eqn(lm_df_v2), parse = TRUE, label.size = NA, fontface = "bold") +
-           geom_label(x = -5, y = 5.8, label = rmse_lab, label.size = NA, fontface = "bold") +
-           geom_label(x = -5, y = 7.1, label = mae_lab, label.size = NA, fontface = "bold") 
+insitu <- p2 + geom_label(x = -4.5, y = 5.5, label = lm_eqn(lm_df_v2), parse = TRUE, label.size = NA, fontface = "bold") +
+           geom_label(x = -4.5, y = 6.8, label = rmse_lab, label.size = NA, fontface = "bold") +
+           geom_label(x = -4.5, y = 8.1, label = mae_lab, label.size = NA, fontface = "bold") 
 
 print(insitu)
 
@@ -414,9 +415,9 @@ head(lm_df_gpr)
 names(lm_df_gpr)[1:2] <-c("y","x") # y = insar, x = gpr
 
 # add labels
-gpr_v2 <- gpr + geom_label(x = -5, y = 5.5, label = lm_eqn(lm_df_gpr), parse = TRUE, label.size = NA, fontface = "bold") +
-  geom_label(x = -5, y = 6.8, label = rmse_lab_v2, label.size = NA, fontface = "bold") +
-  geom_label(x = -5, y = 8.1, label = mae_lab_v2, label.size = NA, fontface = "bold") 
+gpr_v2 <- gpr + geom_label(x = -4.5, y = 5.5, label = lm_eqn(lm_df_gpr), parse = TRUE, label.size = NA, fontface = "bold") +
+  geom_label(x = -4.5, y = 6.8, label = rmse_lab_v2, label.size = NA, fontface = "bold") +
+  geom_label(x = -4.5, y = 8.1, label = mae_lab_v2, label.size = NA, fontface = "bold") 
 
 plot(gpr_v2)
 
@@ -432,7 +433,4 @@ ggsave("./plots/gpr_insitu_stack_v2.pdf",
        height = 9,
        units = "in",
        dpi = 500)
-
-
-
 
