@@ -56,15 +56,16 @@ sources(stack) # check paths
 stack
 
 # bring in swe change data
-depth_change_csv <-read.csv("./climate_station_data/noah/insitu_depth_change.csv")
+depth_change_csv <-read.csv("./climate_station_data/noah/insitu_depth_change_v2.csv")
 sensor_locations <-vect(depth_change_csv, geom = c("x","y"), crs = crs(stack))
 plot(sensor_locations)
 sensor_locations
 
 # bring snow depth sensor locations shapefile for cropping
-loc_raw <-vect("./climate_station_data/noah/Pingers_tower_corr/Pingers_tower_corr.shp")
+loc_raw <-vect("./climate_station_data/pingers_location_new.shp")
 locations <-project(loc_raw, crs(stack))
 locations
+values(locations)
 
 # bring in BA it change data
 ba_raw <-read.csv("./pit_data/ba_swe_change.csv")
@@ -73,10 +74,10 @@ plot(ba_location, add = TRUE, col = 'red')
 ba_location
 
 # crop swe change stack, just for visualization purposes
-ext(locations) # get extent
-shp_ext <-ext(-106.5342, -106.53, 35.8837, 35.889) # make a bit bigger for plotting
+ext(sensorocations) # get extent
+shp_ext <-ext(-106.5323, -106.5318, 35.8884, 35.889) # make a bit bigger for plotting
 stack_crop <-crop(stack, shp_ext)
-plot(stack[[4]])
+plot(stack_crop[[4]])
 points(sensor_locations, cex = 1)
 points(ba_location, col = 'red')
 
@@ -91,6 +92,8 @@ feb19_26 <-stack[[4]]
 
 #### czo sensors
 ## feb 12-19
+test <-c(adjacent(feb12_19, cells = feb12_19_dswe$cell, directions ="8"))
+test
 feb12_19_dswe <-terra::extract(feb12_19, sensor_locations,  cells = TRUE, xy = TRUE)
 colnames(feb12_19_dswe)[2] <-"insar_feb12_19_dswe"
 feb12_19_dswe
@@ -110,6 +113,8 @@ feb12_26_dswe
 ba_feb12_19_dswe <-terra::extract(feb12_19, ba_location,  cells = TRUE, xy = TRUE)
 colnames(ba_feb12_19_dswe)[2] <-"insar_feb12_19_dswe"
 ba_feb12_19_dswe
+
+??terra::extract
 
 ## feb 19-26
 ba_feb19_26_dswe <-terra::extract(feb19_26, ba_location,  cells = TRUE, xy = TRUE)
@@ -133,9 +138,11 @@ ba_dswe
 depth_change_csv_v2 <-cbind(depth_change_csv, feb12_19_dswe$insar_feb12_19_dswe, feb19_26_dswe$insar_feb19_26_dswe,
                       feb12_26_dswe$insar_feb12_26_dswe)
 
+depth_change_csv_v2
+
 
 # rename binded colums
-names(depth_change_csv_v2)[7:9] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe")
+names(depth_change_csv_v2)[8:10] <-c("insar_feb12_19_dswe","insar_feb19_26_dswe","insar_feb12_26_dswe")
 depth_change_csv_v2
 
 ###################
@@ -179,13 +186,14 @@ swe_df
 #### format df for plotting and analysis ####
 #############################################
 
-first <-rep(names(swe_df[4]), length = nrow(swe_df)) 
-second <-rep(names(swe_df[5]), length = nrow(swe_df)) 
-third <-rep(names(swe_df[6]), length = nrow(swe_df))
+first <-rep(names(swe_df[5]), length = nrow(swe_df)) 
+second <-rep(names(swe_df[6]), length = nrow(swe_df)) 
+third <-rep(names(swe_df[7]), length = nrow(swe_df))
 date <-c(first, second, third) # make vector
+date
 
 # repeat meta data
-meta <-rbind(swe_df[1:3],swe_df[1:3],swe_df[1:3])
+meta <-rbind(swe_df[1:4],swe_df[1:4],swe_df[1:4])
 
 # bind date vector
 add_date <-cbind(meta, date)
@@ -247,17 +255,24 @@ ba_plotting_df
 my_colors <-c('darkgreen', 'plum', 'goldenrod')
 
 # create new df for lm and plotting on graph
-lm_df <-plotting_df[-c(1:4)]
+lm_df <-plotting_df[-c(1:5)]
 lm_df
 
 # add ba pit data 
-ba_dat <-cbind(ba_plotting_df[-c(1:4)],rep("NA",3))
+ba_dat <-cbind(ba_plotting_df[-c(1:4)], rep(NA,3))
 colnames(ba_dat) <-colnames(lm_df) 
 ba_dat
 
 # bbind
 lm_df_v2 <-rbind(lm_df, ba_dat)
+lm_df_v2
 names(lm_df_v2)[1:2] <-c("y","x") # y = insar, x = insitu
+
+cor(lm_df_v2$y, lm_df_v2$x)
+hmmt <-lm(lm_df_v2$y ~ lm_df_v2$x)
+summary(hmmt)
+
+?lm
 
 # stats
 # function for running lm, plotting equation and r2 

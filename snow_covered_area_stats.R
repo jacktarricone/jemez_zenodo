@@ -4,6 +4,7 @@
 
 setwd("/Users/jacktarricone/ch1_jemez/")
 
+
 # read in fsca rasters
 # full
 feb_fsca <-rast("./gpr_rasters_ryan/landsat_fsca_2-18v2.tif")

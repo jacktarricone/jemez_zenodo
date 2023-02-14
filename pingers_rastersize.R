@@ -7,6 +7,7 @@ pingers_las <-readLAS("/Users/jacktarricone/ch1_jemez/climate_station_data/adria
 # project to original utm coords
 st_crs(pingers_las) <- 26913
 pingers_las
+plot(pingers_las)
 
 # rasterize
 utm_rast <-rasterize_canopy(pingers_las,
