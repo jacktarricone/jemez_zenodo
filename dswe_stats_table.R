@@ -783,6 +783,34 @@ south_34 <- south_34_v1 +
 print(south_34)
 
 
+## grid arrange
+plot_grid(fs_34, vg_34, north_34, south_34,
+          labels = c("(a)","(b)","(c)","(d)"),
+          align = "h", 
+          nrow = 1,
+          vjust = 1.5,
+          hjust = -.2,
+          rel_widths = c(.25,.25,.25,.25))
+
+ggsave("/Users/jacktarricone/ch1_jemez/plots/new_hist_test_v4.pdf",
+       width = 18, 
+       height = 4,
+       units = "in",
+       dpi = 500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
