@@ -235,77 +235,57 @@ vg_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
 vg_stats # check
 fs_stats
 
-write.csv(fs_stats, "/Users/jacktarricone/ch1_jemez/pit_data/full_scene_swe_stats.csv")
+write.csv(fs_stats, "/Users/jacktarricone/ch1_jemez/pit_data/vg_scene_swe_stats.csv")
 
 ##############
 ### north  ###
 ##############
 
-##########
 # pair 1 #
 ##########
 
-# pair1 stats
 p1_mean_north <-round(as.numeric(global(p1_north, mean, na.rm = TRUE)), digits = 2)
-p1_max_north <-round(as.numeric(global(p1_north, max, na.rm = TRUE)), digits = 2)
-p1_min_north <-round(as.numeric(global(p1_north, min, na.rm = TRUE)), digits = 2)
+p1_med_north <-round(as.numeric(global(p1_north, median, na.rm = TRUE)), digits = 2)
 p1_sd_north <-round(as.numeric(global(p1_north, sd, na.rm = TRUE)), digits = 2)
-
-# pair1 percentiles
-p1_99_north <-as.numeric(quantile(p1_north_df$lyr.1, c(.99))) 
-p1_01_north <-as.numeric(quantile(p1_north_df$lyr.1, c(.01)))
+p1_iqr_north <-round(as.numeric(global(p1_north, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 2 #
 ##########
 
-# pair2 stats
 p2_mean_north <-round(as.numeric(global(p2_north, mean, na.rm = TRUE)), digits = 2)
-p2_max_north <-round(as.numeric(global(p2_north, max, na.rm = TRUE)), digits = 2)
-p2_min_north <-round(as.numeric(global(p2_north, min, na.rm = TRUE)), digits = 2)
+p2_med_north <-round(as.numeric(global(p2_north, median, na.rm = TRUE)), digits = 2)
 p2_sd_north <-round(as.numeric(global(p2_north, sd, na.rm = TRUE)), digits = 2)
-
-# pair2 percentiles
-p2_99_north <-as.numeric(quantile(p2_north_df$lyr.1, c(.99))) 
-p2_01_north <-as.numeric(quantile(p2_north_df$lyr.1, c(.01)))
+p2_iqr_north <-round(as.numeric(global(p2_north, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 3 #
 ##########
 
-# pair3 stats
 p3_mean_north <-round(as.numeric(global(p3_north, mean, na.rm = TRUE)), digits = 2)
-p3_max_north <-round(as.numeric(global(p3_north, max, na.rm = TRUE)), digits = 2)
-p3_min_north <-round(as.numeric(global(p3_north, min, na.rm = TRUE)), digits = 2)
+p3_med_north <-round(as.numeric(global(p3_north, median, na.rm = TRUE)), digits = 2)
 p3_sd_north <-round(as.numeric(global(p3_north, sd, na.rm = TRUE)), digits = 2)
-
-# pair3 percentiles
-p3_99_north <-as.numeric(quantile(p3_north_df$lyr.1, c(.99))) 
-p3_01_north <-as.numeric(quantile(p3_north_df$lyr.1, c(.01)))
+p3_iqr_north <-round(as.numeric(global(p3_north, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 4 #
 ##########
 
-# pair4 stats
 p4_mean_north <-round(as.numeric(global(p4_north, mean, na.rm = TRUE)), digits = 2)
-p4_max_north <-round(as.numeric(global(p4_north, max, na.rm = TRUE)), digits = 2)
-p4_min_north <-round(as.numeric(global(p4_north, min, na.rm = TRUE)), digits = 2)
+p4_med_north <-round(as.numeric(global(p4_north, median, na.rm = TRUE)), digits = 2)
 p4_sd_north <-round(as.numeric(global(p4_north, sd, na.rm = TRUE)), digits = 2)
-
-# pair4 percentiles
-p4_99_north <-as.numeric(quantile(p4_north_df$lyr.1, c(.99)))
-p4_01_north <-as.numeric(quantile(p4_north_df$lyr.1, c(.01)))
-
+p4_iqr_north <-round(as.numeric(global(p4_north, IQR, na.rm = TRUE)), digits = 2)
 
 ## create dataframe
 north_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
                       "mean" = c(p1_mean_north, p2_mean_north, p3_mean_north, p4_mean_north),
-                      "p99" = c(p1_99_north, p2_99_north, p3_99_north, p4_99_north),
-                      "p1" = c(p1_01_north, p2_01_north, p3_01_north, p4_01_north),
-                      "sd" = c(p1_sd_north, p2_sd_north, p3_sd_north, p4_sd_north))
+                      "sd" = c(p1_sd_north, p2_sd_north, p3_sd_north, p4_sd_north),
+                      "med" = c(p1_med_north, p2_med_north, p3_med_north, p4_med_north),
+                      "iqr" = c(p1_iqr_north, p2_iqr_north, p3_iqr_north, p4_iqr_north))
 
-north_stats # check
+vg_stats # check
+fs_stats
+north_stats
 
 write.csv(north_stats, "/Users/jacktarricone/ch1_jemez/pit_data/north_swe_stats.csv")
 
