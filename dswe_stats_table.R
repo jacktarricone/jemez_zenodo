@@ -52,11 +52,13 @@ p4_vg <-mask(p4, vg)
 # crop for north facing slopes
 p1_north_v1 <-mask(p1, ns_no_vg, maskvalue = 2) # 2 = south, therefore masking for 2 will leave north
 p1_north <-mask(p1_north_v1, vg, inverse = TRUE)
+plot(p1_north)
 
 p2_north_v1 <-mask(p2, ns_no_vg, maskvalue = 2) 
 p2_north <-mask(p2_north_v1, vg, inverse = TRUE)
+plot(p2_north)
 
-p3_north_v1 <-mask(p3, ns_no_vg, maskvalue = 2) 
+p3_north_v1 <-mask(p3, ns_no_vg, maskvalue = 2)
 p3_north <-mask(p3_north_v1, vg, inverse = TRUE)
 
 p4_north_v1 <-mask(p4, ns_no_vg, maskvalue = 2) 
@@ -75,9 +77,7 @@ p3_south <-mask(p3_south_v1, vg, inverse = TRUE)
 p4_south_v1 <-mask(p4, ns_no_vg, maskvalue = 1) #
 p4_south <-mask(p4_south_v1, vg, inverse = TRUE)
 
-
 ### make dataframes
-
 ##### full scence
 p1_fs_df <-as.data.frame(p1, na.rm = TRUE)
 names(p1_fs_df)[1] <-"lyr.1"
@@ -142,65 +142,44 @@ names(p4_south_df)[1] <-"lyr.1"
 # pair 1 #
 ##########
 
-# pair1 stats
 p1_mean_fs <-round(as.numeric(global(p1, mean, na.rm = TRUE)), digits = 2)
-p1_max_fs <-round(as.numeric(global(p1, max, na.rm = TRUE)), digits = 2)
-p1_min_fs <-round(as.numeric(global(p1, min, na.rm = TRUE)), digits = 2)
+p1_med_fs <-round(as.numeric(global(p1, median, na.rm = TRUE)), digits = 2)
 p1_sd_fs <-round(as.numeric(global(p1, sd, na.rm = TRUE)), digits = 2)
-
-# pair1 percentiles
-p1_99_fs <-as.numeric(quantile(p1_fs_df$lyr.1, c(.99))) 
-p1_01_fs <-as.numeric(quantile(p1_fs_df$lyr.1, c(.01)))
+p1_iqr_fs <-round(as.numeric(global(p1, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 2 #
 ##########
 
-# pair2 stats
 p2_mean_fs <-round(as.numeric(global(p2, mean, na.rm = TRUE)), digits = 2)
-p2_max_fs <-round(as.numeric(global(p2, max, na.rm = TRUE)), digits = 2)
-p2_min_fs <-round(as.numeric(global(p2, min, na.rm = TRUE)), digits = 2)
+p2_med_fs <-round(as.numeric(global(p2, median, na.rm = TRUE)), digits = 2)
 p2_sd_fs <-round(as.numeric(global(p2, sd, na.rm = TRUE)), digits = 2)
-
-# pair2 percentiles
-p2_99_fs <-as.numeric(quantile(p2_fs_df$lyr.1, c(.99))) 
-p2_01_fs <-as.numeric(quantile(p2_fs_df$lyr.1, c(.01)))
+p2_iqr_fs <-round(as.numeric(global(p2, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 3 #
 ##########
 
-# pair3 stats
 p3_mean_fs <-round(as.numeric(global(p3, mean, na.rm = TRUE)), digits = 2)
-p3_max_fs <-round(as.numeric(global(p3, max, na.rm = TRUE)), digits = 2)
-p3_min_fs <-round(as.numeric(global(p3, min, na.rm = TRUE)), digits = 2)
+p3_med_fs <-round(as.numeric(global(p3, median, na.rm = TRUE)), digits = 2)
 p3_sd_fs <-round(as.numeric(global(p3, sd, na.rm = TRUE)), digits = 2)
-
-# pair3 percentiles
-p3_99_fs <-as.numeric(quantile(p3_fs_df$lyr.1, c(.99))) 
-p3_01_fs <-as.numeric(quantile(p3_fs_df$lyr.1, c(.01)))
+p3_iqr_fs <-round(as.numeric(global(p3, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 4 #
 ##########
 
-# pair4 stats
 p4_mean_fs <-round(as.numeric(global(p4, mean, na.rm = TRUE)), digits = 2)
-p4_max_fs <-round(as.numeric(global(p4, max, na.rm = TRUE)), digits = 2)
-p4_min_fs <-round(as.numeric(global(p4, min, na.rm = TRUE)), digits = 2)
+p4_med_fs <-round(as.numeric(global(p4, median, na.rm = TRUE)), digits = 2)
 p4_sd_fs <-round(as.numeric(global(p4, sd, na.rm = TRUE)), digits = 2)
-
-# pair4 percentiles
-p4_99_fs <-as.numeric(quantile(p4_fs_df$lyr.1, c(.99)))
-p4_01_fs <-as.numeric(quantile(p4_fs_df$lyr.1, c(.01)))
-
+p4_iqr_fs <-round(as.numeric(global(p4, IQR, na.rm = TRUE)), digits = 2)
 
 ## create dataframe
 fs_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
           "mean" = c(p1_mean_fs, p2_mean_fs, p3_mean_fs, p4_mean_fs),
-           "p99" = c(p1_99_fs, p2_99_fs, p3_99_fs, p4_99_fs),
-           "p1" = c(p1_01_fs, p2_01_fs, p3_01_fs, p4_01_fs),
-           "sd" = c(p1_sd_fs, p2_sd_fs, p3_sd_fs, p4_sd_fs))
+          "sd" = c(p1_sd_fs, p2_sd_fs, p3_sd_fs, p4_sd_fs),
+          "med" = c(p1_med_fs, p2_med_fs, p3_med_fs, p4_med_fs),
+          "iqr" = c(p1_iqr_fs, p2_iqr_fs, p3_iqr_fs, p4_iqr_fs))
 
 fs_stats # check
 
@@ -214,69 +193,49 @@ write.csv(fs_stats, "/Users/jacktarricone/ch1_jemez/pit_data/full_scene_swe_stat
 # pair 1 #
 ##########
 
-# pair1 stats
 p1_mean_vg <-round(as.numeric(global(p1_vg, mean, na.rm = TRUE)), digits = 2)
-p1_max_vg <-round(as.numeric(global(p1_vg, max, na.rm = TRUE)), digits = 2)
-p1_min_vg <-round(as.numeric(global(p1_vg, min, na.rm = TRUE)), digits = 2)
+p1_med_vg <-round(as.numeric(global(p1_vg, median, na.rm = TRUE)), digits = 2)
 p1_sd_vg <-round(as.numeric(global(p1_vg, sd, na.rm = TRUE)), digits = 2)
-
-# pair1 percentiles
-p1_99_vg <-as.numeric(quantile(p1_vg_df$lyr.1, c(.99))) 
-p1_01_vg <-as.numeric(quantile(p1_vg_df$lyr.1, c(.01)))
+p1_iqr_vg <-round(as.numeric(global(p1_vg, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 2 #
 ##########
 
-# pair2 stats
 p2_mean_vg <-round(as.numeric(global(p2_vg, mean, na.rm = TRUE)), digits = 2)
-p2_max_vg <-round(as.numeric(global(p2_vg, max, na.rm = TRUE)), digits = 2)
-p2_min_vg <-round(as.numeric(global(p2_vg, min, na.rm = TRUE)), digits = 2)
+p2_med_vg <-round(as.numeric(global(p2_vg, median, na.rm = TRUE)), digits = 2)
 p2_sd_vg <-round(as.numeric(global(p2_vg, sd, na.rm = TRUE)), digits = 2)
-
-# pair2 percentiles
-p2_99_vg <-as.numeric(quantile(p2_vg_df$lyr.1, c(.99))) 
-p2_01_vg <-as.numeric(quantile(p2_vg_df$lyr.1, c(.01)))
+p2_iqr_vg <-round(as.numeric(global(p2_vg, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 3 #
 ##########
 
-# pair3 stats
 p3_mean_vg <-round(as.numeric(global(p3_vg, mean, na.rm = TRUE)), digits = 2)
-p3_max_vg <-round(as.numeric(global(p3_vg, max, na.rm = TRUE)), digits = 2)
-p3_min_vg <-round(as.numeric(global(p3_vg, min, na.rm = TRUE)), digits = 2)
+p3_med_vg <-round(as.numeric(global(p3_vg, median, na.rm = TRUE)), digits = 2)
 p3_sd_vg <-round(as.numeric(global(p3_vg, sd, na.rm = TRUE)), digits = 2)
-
-# pair3 percentiles
-p3_99_vg <-as.numeric(quantile(p3_vg_df$lyr.1, c(.99))) 
-p3_01_vg <-as.numeric(quantile(p3_vg_df$lyr.1, c(.01)))
+p3_iqr_vg <-round(as.numeric(global(p3_vg, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 4 #
 ##########
 
-# pair4 stats
 p4_mean_vg <-round(as.numeric(global(p4_vg, mean, na.rm = TRUE)), digits = 2)
-p4_max_vg <-round(as.numeric(global(p4_vg, max, na.rm = TRUE)), digits = 2)
-p4_min_vg <-round(as.numeric(global(p4_vg, min, na.rm = TRUE)), digits = 2)
+p4_med_vg <-round(as.numeric(global(p4_vg, median, na.rm = TRUE)), digits = 2)
 p4_sd_vg <-round(as.numeric(global(p4_vg, sd, na.rm = TRUE)), digits = 2)
-
-# pair4 percentiles
-p4_99_vg <-as.numeric(quantile(p4_vg_df$lyr.1, c(.99)))
-p4_01_vg <-as.numeric(quantile(p4_vg_df$lyr.1, c(.01)))
-
+p4_iqr_vg <-round(as.numeric(global(p4_vg, IQR, na.rm = TRUE)), digits = 2)
 
 ## create dataframe
 vg_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
                       "mean" = c(p1_mean_vg, p2_mean_vg, p3_mean_vg, p4_mean_vg),
-                      "p99" = c(p1_99_vg, p2_99_vg, p3_99_vg, p4_99_vg),
-                      "p1" = c(p1_01_vg, p2_01_vg, p3_01_vg, p4_01_vg),
-                      "sd" = c(p1_sd_vg, p2_sd_vg, p3_sd_vg, p4_sd_vg))
+                      "sd" = c(p1_sd_vg, p2_sd_vg, p3_sd_vg, p4_sd_vg),
+                      "med" = c(p1_med_vg, p2_med_vg, p3_med_vg, p4_med_vg),
+                      "iqr" = c(p1_iqr_vg, p2_iqr_vg, p3_iqr_vg, p4_iqr_vg))
 
 vg_stats # check
+fs_stats
 
-write.csv(vg_stats, "/Users/jacktarricone/ch1_jemez/pit_data/vg_swe_stats.csv")
+write.csv(fs_stats, "/Users/jacktarricone/ch1_jemez/pit_data/full_scene_swe_stats.csv")
 
 ##############
 ### north  ###
