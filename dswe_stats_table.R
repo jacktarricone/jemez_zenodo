@@ -365,6 +365,8 @@ fancy_scientific <- function(l) {
   parse(text=l)
 }
 
+
+
 ####################
 ####################
 ## full scene pair 1 & 2
@@ -381,12 +383,12 @@ fs_12_v1 <-ggplot()+
   scale_fill_manual(name = "InSAR Pair",
                     labels = c("12-19 Feb.","19-26 Feb."),
                     values = c("darkorchid4","goldenrod"))+
-  scale_x_continuous(limits = c(-6,6), 
-                     breaks = seq(-6,6,2), 
+  scale_x_continuous(limits = c(-8,8), 
+                     breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
   ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
-  theme(legend.position = c(.2,.85)) +
+  theme(legend.position = c(.21,.82)) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
         axis.title.x=element_blank())
 
@@ -399,10 +401,11 @@ fs_2_lab <-c(paste0("Mean = ",p2_mean_fs,"\n","SD = ",p2_sd_fs))
 fs_2_lab
 
 fs_12 <- fs_12_v1 + 
-  annotate(geom="text", x=4, y=1.04e6, label= "12 - 19 Feb.", fontface = "bold") +
-  annotate(geom="text", x=4, y=9.5e5, label= fs_1_lab) +
-  annotate(geom="text", x=4, y=8e5, label= "19 - 26 Feb.", fontface = "bold") +
-  annotate(geom="text", x=4, y=7.16e5, label= fs_2_lab)
+  annotate(geom="text", x=4.2, y=1.1e6, label= "Full Scene", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=9.5e5, label= "12 - 19 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=8.5e5, label= fs_1_lab) +
+  annotate(geom="text", x=4.2, y=7e5, label= "19 - 26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=6e5, label= fs_2_lab)
 
 print(fs_12)
 
@@ -428,8 +431,8 @@ vg_12_v1 <-ggplot()+
   scale_fill_manual(name = "InSAR Pair",
                     labels = c("12-19 Feb.","19-26 Feb."),
                     values = c("darkorchid4","goldenrod"))+
-  scale_x_continuous(limits = c(-6,6), 
-                     breaks = seq(-6,6,2), 
+  scale_x_continuous(limits = c(-8,8), 
+                     breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
   ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
@@ -446,10 +449,11 @@ vg_2_lab <-c(paste0("Mean = ",p2_mean_vg,"\n","SD = ",p2_sd_vg))
 vg_2_lab
 
 vg_12 <-vg_12_v1 +
-  annotate(geom="text", x=4, y=1.04e6, label= "12 - 19 Feb.", fontface = "bold") +
-  annotate(geom="text", x=4, y=9.5e5, label= vg_1_lab) +
-  annotate(geom="text", x=4, y=8e5, label= "19 - 26 Feb.", fontface = "bold") +
-  annotate(geom="text", x=4, y=7.16e5, label= vg_2_lab)
+  annotate(geom="text", x=4.2, y=1.1e6, label= "VG", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=9.5e5, label= "12 - 19 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=8.5e5, label= vg_1_lab) +
+  annotate(geom="text", x=4.2, y=7e5, label= "19 - 26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=6e5, label= vg_2_lab)
 
 print(vg_12)
 
@@ -460,7 +464,7 @@ print(vg_12)
 
 ####################
 ####################
-## vg pair 1 & 2
+## north pair 1 & 2
 ####################
 ####################
 
@@ -474,8 +478,8 @@ north_12_v1 <-ggplot()+
   scale_fill_manual(name = "InSAR Pair",
                     labels = c("12-19 Feb.","19-26 Feb."),
                     values = c("darkorchid4","goldenrod"))+
-  scale_x_continuous(limits = c(-6,6), 
-                     breaks = seq(-6,6,2), 
+  scale_x_continuous(limits = c(-8,8), 
+                     breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
   ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
@@ -483,7 +487,7 @@ north_12_v1 <-ggplot()+
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
         axis.title.x=element_blank())
 
-# plot(north_12_v1)
+plot(north_12_v1)
 
 north_1_lab <-c(paste0("Mean = ",p1_mean_north,"\n","SD = ",p1_sd_north))
 north_1_lab
@@ -492,45 +496,339 @@ north_2_lab <-c(paste0("Mean = ",p2_mean_north,"\n","SD = ",p2_sd_north))
 north_2_lab
 
 north_12 <-north_12_v1 +
-  annotate(geom="text", x=4, y=1.04e6, label= "12 - 19 Feb.", fontface = "bold") +
-  annotate(geom="text", x=4, y=9.5e5, label= north_1_lab) +
-  annotate(geom="text", x=4, y=8e5, label= "19 - 26 Feb.", fontface = "bold") +
-  annotate(geom="text", x=4, y=7.16e5, label= north_2_lab)
+  annotate(geom="text", x=4.2, y=1.1e6, label= "North Facing", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=9.5e5, label= "12 - 19 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=8.5e5, label= north_1_lab) +
+  annotate(geom="text", x=4.2, y=7e5, label= "19 - 26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=6e5, label= north_2_lab)
 
 print(north_12)
 
 
 
 
-# density plot for 12026
-plot_2 <-ggplot()+
+
+
+
+
+
+
+####################
+####################
+## south pair 1 & 2
+####################
+####################
+
+south_12_v1 <-ggplot()+
   geom_vline(xintercept = 0, linetype=3, col = "black") +
-  geom_density(p4_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb. Cumulative", color = "12-26 Feb. Cumulative"), alpha=0.1) +
-  geom_density(p3_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb.", color = "12-26 Feb."), alpha=0.1) +
+  geom_density(p2_south_df, mapping = aes(x=dswe, y=stat(count),fill = "19-26 Feb.", color = "19-26 Feb."), alpha=0.1) +
+  geom_density(p1_south_df, mapping = aes(x=dswe, y=stat(count),fill = "12-19 Feb.", color = "12-19 Feb."), alpha=0.1) +
+  scale_colour_manual(name = "InSAR Pair",
+                      labels = c("12-19 Feb.","19-26 Feb."),
+                      values = c("darkorchid4","goldenrod"))+
+  scale_fill_manual(name = "InSAR Pair",
+                    labels = c("12-19 Feb.","19-26 Feb."),
+                    values = c("darkorchid4","goldenrod"))+
+  scale_x_continuous(limits = c(-8,8), 
+                     breaks = seq(-8,8,2), 
+                     expand = c(0,0)) + 
+  ylab("Count") +
+  scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
+  theme(legend.position = 'none') +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.title.x=element_blank())
+
+plot(south_12_v1)
+
+south_1_lab <-c(paste0("Mean = ",p1_mean_south,"\n","SD = ",p1_sd_south))
+south_1_lab
+
+south_2_lab <-c(paste0("Mean = ",p2_mean_south,"\n","SD = ",p2_sd_south))
+south_2_lab
+
+south_12 <-south_12_v1 +
+  annotate(geom="text", x=4.2, y=1.1e6, label= "South Facing", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=9.5e5, label= "12 - 19 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=8.5e5, label= south_1_lab) +
+  annotate(geom="text", x=4.2, y=7e5, label= "19 - 26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=6e5, label= south_2_lab)
+
+print(south_12)
+
+## grid arrange
+plot_grid(fs_12, vg_12, north_12, south_12,
+          labels = c("(a)","(b)","(c)","(d)"),
+          align = "h", 
+          nrow = 1,
+          vjust = 1.5,
+          hjust = -.2,
+          rel_widths = c(.25,.25,.25,.25))
+
+ggsave("/Users/jacktarricone/ch1_jemez/plots/new_hist_test_v3.pdf",
+       width = 18, 
+       height = 4,
+       units = "in",
+       dpi = 500)
+
+
+
+
+
+
+
+
+
+
+####################
+####################
+## full scene pair 3 & 4
+####################
+####################
+
+fs_34_v1 <-ggplot()+
+  geom_vline(xintercept = 0, linetype=3, col = "black") +
+  geom_density(p4_fs_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb. Cumulative", color = "12-26 Feb. Cumulative"), alpha=0.1) +
+  geom_density(p3_fs_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb.", color = "12-26 Feb."), alpha=0.1) +
   scale_colour_manual(name = "InSAR Pair",
                       labels = c("12-26 Feb.", "12-26 Feb. CM"),
                       values = c("darkred","darkblue"))+
   scale_fill_manual(name = "InSAR Pair",
                     labels = c("12-26 Feb.","12-26 Feb. CM"),
                     values = c("darkred","darkblue"))+
-  scale_x_continuous(limits = c(-10,10), 
-                     breaks = seq(-10,10,2), 
+  scale_x_continuous(limits = c(-8,8), 
+                     breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
   xlab("SWE Change (cm)") + 
   ylab("Count") +
-  scale_y_continuous(labels=fancy_scientific) +
-  theme(legend.position = c(.8,.5)) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
+  theme(legend.position = c(.21,.82)) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
 
-plot(plot_2)
+plot(fs_34_v1)
 
-# stack with cow plot
-plot_grid(plot_1, plot_2,
-          labels = c("(a)","(b)"),
-          align = "v", 
-          nrow = 2,
-          vjust = 1.5,
-          hjust = -.2,
-          rel_heights = c(1/2, 1/2))
+fs_3_lab <-c(paste0("Mean = ",p3_mean_fs,"\n","SD = ",p3_sd_fs))
+fs_3_lab
+
+fs_4_lab <-c(paste0("Mean = ",p4_mean_fs,"\n","SD = ",p4_sd_fs))
+fs_4_lab
+
+fs_34 <- fs_34_v1 + 
+  annotate(geom="text", x=4.2, y=1.1e6, label= "Full Scene", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=9.5e5, label= "12-26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=8.5e5, label= fs_3_lab) +
+  annotate(geom="text", x=4.2, y=7e5, label= "12-26 Feb. CM", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=6e5, label= fs_4_lab)
+
+print(fs_34)
+
+
+
+
+
+
+
+
+
+
+
+####################
+####################
+## vg pair 3 & 4
+####################
+####################
+
+vg_34_v1 <-ggplot()+
+  geom_vline(xintercept = 0, linetype=3, col = "black") +
+  geom_density(p4_vg_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb. Cumulative", color = "12-26 Feb. Cumulative"), alpha=0.1) +
+  geom_density(p3_vg_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb.", color = "12-26 Feb."), alpha=0.1) +
+  scale_colour_manual(name = "InSAR Pair",
+                      labels = c("12-26 Feb.", "12-26 Feb. CM"),
+                      values = c("darkred","darkblue"))+
+  scale_fill_manual(name = "InSAR Pair",
+                    labels = c("12-26 Feb.","12-26 Feb. CM"),
+                    values = c("darkred","darkblue"))+
+  scale_x_continuous(limits = c(-8,8), 
+                     breaks = seq(-8,8,2), 
+                     expand = c(0,0)) + 
+  xlab("SWE Change (cm)") + 
+  ylab("Count") +
+  scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
+  theme(legend.position = 'none') +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+
+plot(vg_34_v1)
+
+vg_3_lab <-c(paste0("Mean = ",p3_mean_vg,"\n","SD = ",p3_sd_vg))
+vg_3_lab
+
+vg_4_lab <-c(paste0("Mean = ",p4_mean_vg,"\n","SD = ",p4_sd_vg))
+vg_4_lab
+
+vg_34 <- vg_34_v1 + 
+  annotate(geom="text", x=4.2, y=1.1e6, label= "VG", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=9.5e5, label= "12-26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=8.5e5, label= vg_3_lab) +
+  annotate(geom="text", x=4.2, y=7e5, label= "12-26 Feb. CM", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=6e5, label= vg_4_lab)
+
+print(vg_34)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+####################
+####################
+## north pair 3 & 4
+####################
+####################
+
+north_34_v1 <-ggplot()+
+  geom_vline(xintercept = 0, linetype=3, col = "black") +
+  geom_density(p4_north_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb. Cumulative", color = "12-26 Feb. Cumulative"), alpha=0.1) +
+  geom_density(p3_north_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb.", color = "12-26 Feb."), alpha=0.1) +
+  scale_colour_manual(name = "InSAR Pair",
+                      labels = c("12-26 Feb.", "12-26 Feb. CM"),
+                      values = c("darkred","darkblue"))+
+  scale_fill_manual(name = "InSAR Pair",
+                    labels = c("12-26 Feb.","12-26 Feb. CM"),
+                    values = c("darkred","darkblue"))+
+  scale_x_continuous(limits = c(-8,8), 
+                     breaks = seq(-8,8,2), 
+                     expand = c(0,0)) + 
+  xlab("SWE Change (cm)") + 
+  ylab("Count") +
+  scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
+  theme(legend.position = 'none') +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+
+plot(north_34_v1)
+
+north_3_lab <-c(paste0("Mean = ",p3_mean_north,"\n","SD = ",p3_sd_north))
+north_3_lab
+
+north_4_lab <-c(paste0("Mean = ",p4_mean_north,"\n","SD = ",p4_sd_north))
+north_4_lab
+
+north_34 <- north_34_v1 + 
+  annotate(geom="text", x=4.2, y=1.1e6, label= "North Facing", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=9.5e5, label= "12-26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=8.5e5, label= north_3_lab) +
+  annotate(geom="text", x=4.2, y=7e5, label= "12-26 Feb. CM", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=6e5, label= north_4_lab)
+
+print(north_34)
+
+
+
+
+
+
+
+
+
+
+
+
+####################
+####################
+## south pair 3 & 4
+####################
+####################
+
+south_34_v1 <-ggplot()+
+  geom_vline(xintercept = 0, linetype=3, col = "black") +
+  geom_density(p4_south_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb. Cumulative", color = "12-26 Feb. Cumulative"), alpha=0.1) +
+  geom_density(p3_south_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb.", color = "12-26 Feb."), alpha=0.1) +
+  scale_colour_manual(name = "InSAR Pair",
+                      labels = c("12-26 Feb.", "12-26 Feb. CM"),
+                      values = c("darkred","darkblue"))+
+  scale_fill_manual(name = "InSAR Pair",
+                    labels = c("12-26 Feb.","12-26 Feb. CM"),
+                    values = c("darkred","darkblue"))+
+  scale_x_continuous(limits = c(-8,8), 
+                     breaks = seq(-8,8,2), 
+                     expand = c(0,0)) + 
+  xlab("SWE Change (cm)") + 
+  ylab("Count") +
+  scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
+  theme(legend.position = 'none') +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+
+plot(south_34_v1)
+
+south_3_lab <-c(paste0("Mean = ",p3_mean_south,"\n","SD = ",p3_sd_south))
+south_3_lab
+
+south_4_lab <-c(paste0("Mean = ",p4_mean_south,"\n","SD = ",p4_sd_south))
+south_4_lab
+
+south_34 <- south_34_v1 + 
+  annotate(geom="text", x=4.2, y=1.1e6, label= "South Facing", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=9.5e5, label= "12-26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=8.5e5, label= south_3_lab) +
+  annotate(geom="text", x=4.2, y=7e5, label= "12-26 Feb. CM", fontface = "bold") +
+  annotate(geom="text", x=4.2, y=6e5, label= south_4_lab)
+
+print(south_34)
+
+
+
+
+
+
+
+
+
+
+
+a <-data.frame(group = "Full Scene", dswe = p1_fs_df$dswe)
+b <-data.frame(group = "VG", dswe = p1_vg_df$dswe)
+c <-data.frame(group = "North Facing", dswe = p1_north_df$dswe)
+d <-data.frame(group = "South Facing", dswe = p1_south_df$dswe)
+
+# Combine into one long data frame
+p1_df <- rbind(a, b, c, d)
+
+
+head(p1_df)
+
+# starting plot
+ggplot(p1_df, mapping = aes(x = as.factor(group), y = dswe, fill = as.factor(group))) +
+  geom_boxplot(linewidth = .5, width = .4, outlier.size = .01, outlier.shape = 1) +
+  scale_fill_manual(values = c('1' = 'goldenrod', '2' = 'cornflowerblue',
+                               '3' = 'darkred', '4' = 'darkviolet'))+
+  xlab("Year") + ylab("dSWE") +
+  scale_y_continuous(limits = c(-3,1)) +
+  theme_classic(13) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.text.x = element_text(angle = 75, hjust = 1),
+        legend.position = "none")
+
+
+# starting plot
+scf <-ggplot(scf_mk_df, mapping = aes(x = as.factor(year), y = scf_percent_100, fill = as.factor(SNSR_aspect))) +
+  geom_boxplot(linewidth = .5, width = .4, outlier.size = .01, outlier.shape = 1) +
+  scale_fill_manual(name = "Aspect",
+                    values = c('1' = 'goldenrod', '2' = 'cornflowerblue'),
+                    labels = c('North Facing', 'South Facing'))+
+  xlab("Year") + ylab("SCF (%)") +
+  scale_y_continuous(limits = c(0,100)) +
+  theme_classic(11) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.text.x = element_text(angle = 75, hjust = 1),
+        legend.position = "none")
+
+
 
 
