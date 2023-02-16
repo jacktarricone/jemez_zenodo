@@ -30,14 +30,17 @@ plot(ns_no_vg)
 # pair 1
 feb12_19_r <-rast("dswe_feb12-19_sp.tif")
 p1 <-crop(feb12_19_r, vg_aoi)
+plot(p1)
 
 # pair 2
 feb19_26_r <-rast("dswe_feb19-26_sp.tif")
 p2 <-crop(feb19_26_r, vg_aoi)
+plot(p2)
 
 # pair 3
 feb12_26_r <-rast("dswe_feb12-26_sp.tif")
 p3 <-crop(feb12_26_r, vg_aoi)
+plot(p3)
 
 # pair 4
 feb12_26_cm_r <-rast("dswe_feb12-26_cumulative.tif")
@@ -80,55 +83,55 @@ p4_south <-mask(p4_south_v1, vg, inverse = TRUE)
 ### make dataframes
 ##### full scence
 p1_fs_df <-as.data.frame(p1, na.rm = TRUE)
-names(p1_fs_df)[1] <-"lyr.1"
+names(p1_fs_df)[1] <-"dswe"
 
 p2_fs_df <-as.data.frame(p2, na.rm = TRUE)
-names(p2_fs_df)[1] <-"lyr.1"
+names(p2_fs_df)[1] <-"dswe"
 
 p3_fs_df <-as.data.frame(p3, na.rm = TRUE)
-names(p3_fs_df)[1] <-"lyr.1"
+names(p3_fs_df)[1] <-"dswe"
 
 p4_fs_df <-as.data.frame(p4, na.rm = TRUE)
-names(p4_fs_df)[1] <-"lyr.1"
+names(p4_fs_df)[1] <-"dswe"
 
 ######## vg
 p1_vg_df <-as.data.frame(p1_vg, na.rm = TRUE)
-names(p1_vg_df)[1] <-"lyr.1"
+names(p1_vg_df)[1] <-"dswe"
 
 p2_vg_df <-as.data.frame(p2_vg, na.rm = TRUE)
-names(p2_vg_df)[1] <-"lyr.1"
+names(p2_vg_df)[1] <-"dswe"
 
 p3_vg_df <-as.data.frame(p3_vg, na.rm = TRUE)
-names(p3_vg_df)[1] <-"lyr.1"
+names(p3_vg_df)[1] <-"dswe"
 
 p4_vg_df <-as.data.frame(p4_vg, na.rm = TRUE)
-names(p4_vg_df)[1] <-"lyr.1"
+names(p4_vg_df)[1] <-"dswe"
 
 ######## north facing
 p1_north_df <-as.data.frame(p1_north, na.rm = TRUE)
-names(p1_north_df)[1] <-"lyr.1"
+names(p1_north_df)[1] <-"dswe"
 
 p2_north_df <-as.data.frame(p2_north, na.rm = TRUE)
-names(p2_north_df)[1] <-"lyr.1"
+names(p2_north_df)[1] <-"dswe"
 
 p3_north_df <-as.data.frame(p3_north, na.rm = TRUE)
-names(p3_north_df)[1] <-"lyr.1"
+names(p3_north_df)[1] <-"dswe"
 
 p4_north_df <-as.data.frame(p4_north, na.rm = TRUE)
-names(p4_north_df)[1] <-"lyr.1"
+names(p4_north_df)[1] <-"dswe"
 
 ######## south facing
 p1_south_df <-as.data.frame(p1_south, na.rm = TRUE)
-names(p1_south_df)[1] <-"lyr.1"
+names(p1_south_df)[1] <-"dswe"
 
 p2_south_df <-as.data.frame(p2_south, na.rm = TRUE)
-names(p2_south_df)[1] <-"lyr.1"
+names(p2_south_df)[1] <-"dswe"
 
 p3_south_df <-as.data.frame(p3_south, na.rm = TRUE)
-names(p3_south_df)[1] <-"lyr.1"
+names(p3_south_df)[1] <-"dswe"
 
 p4_south_df <-as.data.frame(p4_south, na.rm = TRUE)
-names(p4_south_df)[1] <-"lyr.1"
+names(p4_south_df)[1] <-"dswe"
 
 #####################
 ## calculate stats ##
@@ -241,6 +244,7 @@ write.csv(fs_stats, "/Users/jacktarricone/ch1_jemez/pit_data/vg_scene_swe_stats.
 ### north  ###
 ##############
 
+##########
 # pair 1 #
 ##########
 
@@ -297,68 +301,236 @@ write.csv(north_stats, "/Users/jacktarricone/ch1_jemez/pit_data/north_swe_stats.
 # pair 1 #
 ##########
 
-# pair1 stats
 p1_mean_south <-round(as.numeric(global(p1_south, mean, na.rm = TRUE)), digits = 2)
-p1_max_south <-round(as.numeric(global(p1_south, max, na.rm = TRUE)), digits = 2)
-p1_min_south <-round(as.numeric(global(p1_south, min, na.rm = TRUE)), digits = 2)
+p1_med_south <-round(as.numeric(global(p1_south, median, na.rm = TRUE)), digits = 2)
 p1_sd_south <-round(as.numeric(global(p1_south, sd, na.rm = TRUE)), digits = 2)
-
-# pair1 percentiles
-p1_99_south <-as.numeric(quantile(p1_south_df$lyr.1, c(.99))) 
-p1_01_south <-as.numeric(quantile(p1_south_df$lyr.1, c(.01)))
+p1_iqr_south <-round(as.numeric(global(p1_south, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 2 #
 ##########
 
-# pair2 stats
 p2_mean_south <-round(as.numeric(global(p2_south, mean, na.rm = TRUE)), digits = 2)
-p2_max_south <-round(as.numeric(global(p2_south, max, na.rm = TRUE)), digits = 2)
-p2_min_south <-round(as.numeric(global(p2_south, min, na.rm = TRUE)), digits = 2)
+p2_med_south <-round(as.numeric(global(p2_south, median, na.rm = TRUE)), digits = 2)
 p2_sd_south <-round(as.numeric(global(p2_south, sd, na.rm = TRUE)), digits = 2)
-
-# pair2 percentiles
-p2_99_south <-as.numeric(quantile(p2_south_df$lyr.1, c(.99))) 
-p2_01_south <-as.numeric(quantile(p2_south_df$lyr.1, c(.01)))
+p2_iqr_south <-round(as.numeric(global(p2_south, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 3 #
 ##########
 
-# pair3 stats
 p3_mean_south <-round(as.numeric(global(p3_south, mean, na.rm = TRUE)), digits = 2)
-p3_max_south <-round(as.numeric(global(p3_south, max, na.rm = TRUE)), digits = 2)
-p3_min_south <-round(as.numeric(global(p3_south, min, na.rm = TRUE)), digits = 2)
+p3_med_south <-round(as.numeric(global(p3_south, median, na.rm = TRUE)), digits = 2)
 p3_sd_south <-round(as.numeric(global(p3_south, sd, na.rm = TRUE)), digits = 2)
-
-# pair3 percentiles
-p3_99_south <-as.numeric(quantile(p3_south_df$lyr.1, c(.99))) 
-p3_01_south <-as.numeric(quantile(p3_south_df$lyr.1, c(.01)))
+p3_iqr_south <-round(as.numeric(global(p3_south, IQR, na.rm = TRUE)), digits = 2)
 
 ##########
 # pair 4 #
 ##########
 
-# pair4 stats
 p4_mean_south <-round(as.numeric(global(p4_south, mean, na.rm = TRUE)), digits = 2)
-p4_max_south <-round(as.numeric(global(p4_south, max, na.rm = TRUE)), digits = 2)
-p4_min_south <-round(as.numeric(global(p4_south, min, na.rm = TRUE)), digits = 2)
+p4_med_south <-round(as.numeric(global(p4_south, median, na.rm = TRUE)), digits = 2)
 p4_sd_south <-round(as.numeric(global(p4_south, sd, na.rm = TRUE)), digits = 2)
-
-# pair4 percentiles
-p4_99_south <-as.numeric(quantile(p4_south_df$lyr.1, c(.99)))
-p4_01_south <-as.numeric(quantile(p4_south_df$lyr.1, c(.01)))
-
+p4_iqr_south <-round(as.numeric(global(p4_south, IQR, na.rm = TRUE)), digits = 2)
 
 ## create dataframe
 south_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
                          "mean" = c(p1_mean_south, p2_mean_south, p3_mean_south, p4_mean_south),
-                         "p99" = c(p1_99_south, p2_99_south, p3_99_south, p4_99_south),
-                         "p1" = c(p1_01_south, p2_01_south, p3_01_south, p4_01_south),
-                         "sd" = c(p1_sd_south, p2_sd_south, p3_sd_south, p4_sd_south))
+                         "sd" = c(p1_sd_south, p2_sd_south, p3_sd_south, p4_sd_south),
+                         "med" = c(p1_med_south, p2_med_south, p3_med_south, p4_med_south),
+                         "iqr" = c(p1_iqr_south, p2_iqr_south, p3_iqr_south, p4_iqr_south))
 
-south_stats # check
+
+fs_stats
+vg_stats 
+north_stats
+south_stats
 
 write.csv(south_stats, "/Users/jacktarricone/ch1_jemez/pit_data/south_swe_stats.csv")
+
+
+####
+# histograms
+###
+
+# set y axis scientific theme
+fancy_scientific <- function(l) {
+  # turn in to character string in scientific notation
+  l <- format(l, scientific = TRUE)
+  # quote the part before the exponent to keep all the digits
+  l <- gsub("^(.*)e", "'\\1'e", l)
+  # turn the 'e+' into plotmath format
+  l <- gsub("e", "%*%10^", l)
+  # return this as an expression
+  parse(text=l)
+}
+
+####################
+####################
+## full scene pair 1 & 2
+####################
+####################
+
+fs_12_v1 <-ggplot()+
+  geom_vline(xintercept = 0, linetype=3, col = "black") +
+  geom_density(p2_fs_df, mapping = aes(x=dswe, y=stat(count),fill = "19-26 Feb.", color = "19-26 Feb."), alpha=0.1) +
+  geom_density(p1_fs_df, mapping = aes(x=dswe, y=stat(count),fill = "12-19 Feb.", color = "12-19 Feb."), alpha=0.1) +
+  scale_colour_manual(name = "InSAR Pair",
+                      labels = c("12-19 Feb.","19-26 Feb."),
+                      values = c("darkorchid4","goldenrod"))+
+  scale_fill_manual(name = "InSAR Pair",
+                    labels = c("12-19 Feb.","19-26 Feb."),
+                    values = c("darkorchid4","goldenrod"))+
+  scale_x_continuous(limits = c(-6,6), 
+                     breaks = seq(-6,6,2), 
+                     expand = c(0,0)) + 
+  ylab("Count") +
+  scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
+  theme(legend.position = c(.2,.85)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.title.x=element_blank())
+
+plot(fs_12_v1)
+
+fs_1_lab <-c(paste0("Mean = ",p1_mean_fs,"\n","SD = ",p1_sd_fs))
+fs_1_lab
+
+fs_2_lab <-c(paste0("Mean = ",p2_mean_fs,"\n","SD = ",p2_sd_fs))
+fs_2_lab
+
+fs_12 <- fs_12_v1 + 
+  annotate(geom="text", x=4, y=1.04e6, label= "12 - 19 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4, y=9.5e5, label= fs_1_lab) +
+  annotate(geom="text", x=4, y=8e5, label= "19 - 26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4, y=7.16e5, label= fs_2_lab)
+
+print(fs_12)
+
+
+
+
+
+
+
+####################
+####################
+## vg pair 1 & 2
+####################
+####################
+
+vg_12_v1 <-ggplot()+
+  geom_vline(xintercept = 0, linetype=3, col = "black") +
+  geom_density(p2_vg_df, mapping = aes(x=dswe, y=stat(count),fill = "19-26 Feb.", color = "19-26 Feb."), alpha=0.1) +
+  geom_density(p1_vg_df, mapping = aes(x=dswe, y=stat(count),fill = "12-19 Feb.", color = "12-19 Feb."), alpha=0.1) +
+  scale_colour_manual(name = "InSAR Pair",
+                      labels = c("12-19 Feb.","19-26 Feb."),
+                      values = c("darkorchid4","goldenrod"))+
+  scale_fill_manual(name = "InSAR Pair",
+                    labels = c("12-19 Feb.","19-26 Feb."),
+                    values = c("darkorchid4","goldenrod"))+
+  scale_x_continuous(limits = c(-6,6), 
+                     breaks = seq(-6,6,2), 
+                     expand = c(0,0)) + 
+  ylab("Count") +
+  scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
+  theme(legend.position = 'none') +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.title.x=element_blank())
+
+# plot(vg_12_v1)
+
+vg_1_lab <-c(paste0("Mean = ",p1_mean_vg,"\n","SD = ",p1_sd_vg))
+vg_1_lab
+
+vg_2_lab <-c(paste0("Mean = ",p2_mean_vg,"\n","SD = ",p2_sd_vg))
+vg_2_lab
+
+vg_12 <-vg_12_v1 +
+  annotate(geom="text", x=4, y=1.04e6, label= "12 - 19 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4, y=9.5e5, label= vg_1_lab) +
+  annotate(geom="text", x=4, y=8e5, label= "19 - 26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4, y=7.16e5, label= vg_2_lab)
+
+print(vg_12)
+
+
+
+
+
+
+####################
+####################
+## vg pair 1 & 2
+####################
+####################
+
+north_12_v1 <-ggplot()+
+  geom_vline(xintercept = 0, linetype=3, col = "black") +
+  geom_density(p2_north_df, mapping = aes(x=dswe, y=stat(count),fill = "19-26 Feb.", color = "19-26 Feb."), alpha=0.1) +
+  geom_density(p1_north_df, mapping = aes(x=dswe, y=stat(count),fill = "12-19 Feb.", color = "12-19 Feb."), alpha=0.1) +
+  scale_colour_manual(name = "InSAR Pair",
+                      labels = c("12-19 Feb.","19-26 Feb."),
+                      values = c("darkorchid4","goldenrod"))+
+  scale_fill_manual(name = "InSAR Pair",
+                    labels = c("12-19 Feb.","19-26 Feb."),
+                    values = c("darkorchid4","goldenrod"))+
+  scale_x_continuous(limits = c(-6,6), 
+                     breaks = seq(-6,6,2), 
+                     expand = c(0,0)) + 
+  ylab("Count") +
+  scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
+  theme(legend.position = 'none') +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.title.x=element_blank())
+
+# plot(north_12_v1)
+
+north_1_lab <-c(paste0("Mean = ",p1_mean_north,"\n","SD = ",p1_sd_north))
+north_1_lab
+
+north_2_lab <-c(paste0("Mean = ",p2_mean_north,"\n","SD = ",p2_sd_north))
+north_2_lab
+
+north_12 <-north_12_v1 +
+  annotate(geom="text", x=4, y=1.04e6, label= "12 - 19 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4, y=9.5e5, label= north_1_lab) +
+  annotate(geom="text", x=4, y=8e5, label= "19 - 26 Feb.", fontface = "bold") +
+  annotate(geom="text", x=4, y=7.16e5, label= north_2_lab)
+
+print(north_12)
+
+
+
+
+# density plot for 12026
+plot_2 <-ggplot()+
+  geom_vline(xintercept = 0, linetype=3, col = "black") +
+  geom_density(p4_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb. Cumulative", color = "12-26 Feb. Cumulative"), alpha=0.1) +
+  geom_density(p3_df, mapping = aes(x=dswe, y=stat(count),fill = "12-26 Feb.", color = "12-26 Feb."), alpha=0.1) +
+  scale_colour_manual(name = "InSAR Pair",
+                      labels = c("12-26 Feb.", "12-26 Feb. CM"),
+                      values = c("darkred","darkblue"))+
+  scale_fill_manual(name = "InSAR Pair",
+                    labels = c("12-26 Feb.","12-26 Feb. CM"),
+                    values = c("darkred","darkblue"))+
+  scale_x_continuous(limits = c(-10,10), 
+                     breaks = seq(-10,10,2), 
+                     expand = c(0,0)) + 
+  xlab("SWE Change (cm)") + 
+  ylab("Count") +
+  scale_y_continuous(labels=fancy_scientific) +
+  theme(legend.position = c(.8,.5)) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+
+plot(plot_2)
+
+# stack with cow plot
+plot_grid(plot_1, plot_2,
+          labels = c("(a)","(b)"),
+          align = "v", 
+          nrow = 2,
+          vjust = 1.5,
+          hjust = -.2,
+          rel_heights = c(1/2, 1/2))
 
 
