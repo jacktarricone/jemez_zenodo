@@ -463,7 +463,7 @@ plot_grid(insitu, gpr_v2,
           nrow = 2, 
           rel_heights = c(1/2, 1/2))
 
-ggsave("./plots/gpr_insitu_stack_v2.pdf",
+ggsave("./plots/correct_location_gpr_insitu_stack_v1.pdf",
        width = 5, 
        height = 9,
        units = "in",

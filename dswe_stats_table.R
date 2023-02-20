@@ -63,11 +63,21 @@ plot(vg, add = TRUE)
 ns_no_vg <-mask(lidar_ns, vg, inverse = TRUE)
 plot(ns_no_vg)
 
+# bring in snow mask
+fsca_mask_0218 <-rast("/Users/jacktarricone/ch1_jemez/landsat_fsca/0218_mask.tif")
+values(fsca_mask_0218)[values(fsca_mask_0218) < -998] = 999
+plot(fsca_mask_0218)
+
+## resample scale down to 5.6 m
+no_snow_mask <-resample(fsca_mask_0218, lidar_ns)
+plot(no_snow_mask, col = 'red')
+
 ####### load in rasters
 # pair 1
 feb12_19_r <-rast("dswe_feb12-19_sp.tif")
 p1 <-crop(feb12_19_r, vg_aoi)
 plot(p1)
+plot(no_snow_mask, col = 'red', add = TRUE)
 
 # pair 2
 feb19_26_r <-rast("dswe_feb19-26_sp.tif")
