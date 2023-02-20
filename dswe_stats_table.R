@@ -4,7 +4,10 @@
 # jan 16th, 2022
 
 library(terra)
+library(cowplot)
 library(ggplot2)
+library(grid)
+library(gridExtra)
 
 # set custom theme
 theme_classic <- function(base_size = 11, base_family = "",
@@ -420,10 +423,11 @@ fs_12_v1 <-ggplot()+
                      breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
   ylab("Count") +
-  xlab(expression(Delta~'SWE'))+
+  #xlab(expression(Delta~'SWE'))+
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
   theme(legend.position = c(.21,.82)) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.title.x=element_blank(),
         axis.title.y=element_blank())
 
 # plot(fs_12_v1)
@@ -471,11 +475,13 @@ vg_12_v1 <-ggplot()+
   scale_x_continuous(limits = c(-8,8), 
                      breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
-  ylab("Count") +
+  # ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
   theme(legend.position = 'none') +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
-        axis.title.x=element_blank())
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank())
 
 # plot(vg_12_v1)
 
@@ -518,11 +524,13 @@ north_12_v1 <-ggplot()+
   scale_x_continuous(limits = c(-8,8), 
                      breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
-  ylab("Count") +
+  # ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
   theme(legend.position = 'none') +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
-        axis.title.x=element_blank())
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank())
 
 plot(north_12_v1)
 
@@ -569,11 +577,13 @@ south_12_v1 <-ggplot()+
   scale_x_continuous(limits = c(-8,8), 
                      breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
-  ylab("Count") +
+  # ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
   theme(legend.position = 'none') +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
-        axis.title.x=element_blank())
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank())
 
 plot(south_12_v1)
 
@@ -593,15 +603,26 @@ south_12 <-south_12_v1 +
 print(south_12)
 
 ## grid arrange
-plot_grid(fs_12, vg_12, north_12, south_12,
+p1p2 <-plot_grid(fs_12, vg_12, north_12, south_12,
           labels = c("(a)","(b)","(c)","(d)"),
-          align = "h", 
+          # align = "v", 
           nrow = 1,
-          vjust = 1.5,
-          hjust = -.2,
-          rel_widths = c(.25,.25,.25,.25))
+          ncol = 4,
+          vjust = 3.5,
+          hjust = -2,
+          rel_widths = c(.28,.24,.24,.24))
 
-ggsave("/Users/jacktarricone/ch1_jemez/plots/new_hist_test_v3.pdf",
+plot(p1p2)
+
+
+y.grob <- textGrob('Count',
+                   gp=gpar(fontface="bold", col="black", fontsize=17), rot=90)
+
+final_p1p2 <-grid.arrange(arrangeGrob(p1p2, left = y.grob))
+
+
+ggsave2("/Users/jacktarricone/ch1_jemez/plots/dswe_p1p2_v1.pdf",
+        final_p1p1,
        width = 18, 
        height = 4,
        units = "in",
@@ -635,11 +656,13 @@ fs_34_v1 <-ggplot()+
   scale_x_continuous(limits = c(-8,8), 
                      breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
-  xlab("SWE Change (cm)") + 
+  # xlab("SWE Change (cm)") + 
   ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
   theme(legend.position = c(.21,.82)) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank())
 
 plot(fs_34_v1)
 
@@ -687,11 +710,14 @@ vg_34_v1 <-ggplot()+
   scale_x_continuous(limits = c(-8,8), 
                      breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
-  xlab("SWE Change (cm)") + 
-  ylab("Count") +
+  # xlab("SWE Change (cm)") + 
+  # ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
   theme(legend.position = 'none') +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank())
 
 plot(vg_34_v1)
 
@@ -743,11 +769,14 @@ north_34_v1 <-ggplot()+
   scale_x_continuous(limits = c(-8,8), 
                      breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
-  xlab("SWE Change (cm)") + 
-  ylab("Count") +
+  # xlab("SWE Change (cm)") + 
+  # ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
   theme(legend.position = 'none') +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank())
 
 plot(north_34_v1)
 
@@ -796,11 +825,14 @@ south_34_v1 <-ggplot()+
   scale_x_continuous(limits = c(-8,8), 
                      breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
-  xlab("SWE Change (cm)") + 
-  ylab("Count") +
+  # xlab("SWE Change (cm)") + 
+  # ylab("Count") +
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
   theme(legend.position = 'none') +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1))
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank())
 
 plot(south_34_v1)
 
@@ -821,20 +853,49 @@ print(south_34)
 
 
 ## grid arrange
-plot_grid(fs_34, vg_34, north_34, south_34,
-          labels = c("(a)","(b)","(c)","(d)"),
-          align = "h", 
+p3p4 <-plot_grid(fs_34, vg_34, north_34, south_34,
+          labels = c("(e)","(f)","(g)","(h)"),
+          # align = "v", 
           nrow = 1,
-          vjust = 1.5,
-          hjust = -.2,
-          rel_widths = c(.25,.25,.25,.25))
+          ncol = 4,
+          vjust = 3.5,
+          hjust = -2,
+          rel_widths = c(.28,.24,.24,.24))
 
-ggsave("/Users/jacktarricone/ch1_jemez/plots/new_hist_test_v4.pdf",
+plot(p3p4)
+
+x.grob <- textGrob(expression(Delta ~ 'SWE'),
+                   gp=gpar(fontface="bold", col="black", fontsize=20))
+
+y.grob <- textGrob('Count',
+                   gp=gpar(fontface="bold", col="black", fontsize=17), rot=90)
+
+final_p3p4 <-grid.arrange(arrangeGrob(p3p4, left = y.grob, bottom = x.grob))
+plot(final_p3p4)
+
+ggsave2("/Users/jacktarricone/ch1_jemez/plots/dswe_p3p4_v1.pdf",
+        final_p3p4,
        width = 18, 
        height = 4,
        units = "in",
        dpi = 500)
 
+### stitch both together
+
+# final_1234 <-grid.arrange(
+#   grobs = list(final_p1p2,
+#   final_p3p4),
+#   nrow = 2,
+#   heigths = c(.3,.7))
+
+final_1234 <-plot_grid(final_p1p2, final_p3p4, align = "v", nrow = 2, rel_heights = c(.48, .52))
+
+ggsave2("/Users/jacktarricone/ch1_jemez/plots/dswe_hist_full_v1.pdf",
+        final_1234,
+        width = 18, 
+        height = 8,
+        units = "in",
+        dpi = 500)
 
 
 
@@ -857,42 +918,7 @@ ggsave("/Users/jacktarricone/ch1_jemez/plots/new_hist_test_v4.pdf",
 
 
 
-a <-data.frame(group = "Full Scene", dswe = p1_fs_df$dswe)
-b <-data.frame(group = "VG", dswe = p1_vg_df$dswe)
-c <-data.frame(group = "North Facing", dswe = p1_north_df$dswe)
-d <-data.frame(group = "South Facing", dswe = p1_south_df$dswe)
 
-# Combine into one long data frame
-p1_df <- rbind(a, b, c, d)
-
-
-head(p1_df)
-
-# starting plot
-ggplot(p1_df, mapping = aes(x = as.factor(group), y = dswe, fill = as.factor(group))) +
-  geom_boxplot(linewidth = .5, width = .4, outlier.size = .01, outlier.shape = 1) +
-  scale_fill_manual(values = c('1' = 'goldenrod', '2' = 'cornflowerblue',
-                               '3' = 'darkred', '4' = 'darkviolet'))+
-  xlab("Year") + ylab("dSWE") +
-  scale_y_continuous(limits = c(-3,1)) +
-  theme_classic(13) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
-        axis.text.x = element_text(angle = 75, hjust = 1),
-        legend.position = "none")
-
-
-# starting plot
-scf <-ggplot(scf_mk_df, mapping = aes(x = as.factor(year), y = scf_percent_100, fill = as.factor(SNSR_aspect))) +
-  geom_boxplot(linewidth = .5, width = .4, outlier.size = .01, outlier.shape = 1) +
-  scale_fill_manual(name = "Aspect",
-                    values = c('1' = 'goldenrod', '2' = 'cornflowerblue'),
-                    labels = c('North Facing', 'South Facing'))+
-  xlab("Year") + ylab("SCF (%)") +
-  scale_y_continuous(limits = c(0,100)) +
-  theme_classic(11) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
-        axis.text.x = element_text(angle = 75, hjust = 1),
-        legend.position = "none")
 
 
 
