@@ -8,6 +8,7 @@ library(cowplot)
 library(ggplot2)
 library(grid)
 library(gridExtra)
+library(kableExtra)
 
 # set custom theme
 theme_classic <- function(base_size = 11, base_family = "",
@@ -382,6 +383,16 @@ vg_stats
 north_stats
 south_stats
 
+
+table <-as.data.frame(rbind(fs_stats, vg_stats, north_stats, south_stats))
+
+table %>%
+  kbl(caption="Summary Statistics of Financial Well-Being Score by Gender and Education",
+      format="latex",
+      col.names = c("Pair","Mean","SD","Median","IQR"),
+      align="r") %>%
+  kable_minimal(full_width = F,  html_font = "Source Sans Pro")
+
 # write.csv(south_stats, "/Users/jacktarricone/ch1_jemez/pit_data/south_swe_stats.csv")
 
 
@@ -446,6 +457,7 @@ fs_12 <- fs_12_v1 +
   annotate(geom="text", x=4.2, y=6e5, label= fs_2_lab)
 
 print(fs_12)
+
 
 
 

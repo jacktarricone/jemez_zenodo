@@ -54,12 +54,13 @@ rast_list <-list.files("./gpr_rasters_ryan/new_swe_change",
 stack <-rast(rast_list)
 sources(stack) # check paths
 stack
+plot(stack)
 
 # bring in swe change data
 depth_change_csv <-read.csv("./climate_station_data/noah/insitu_depth_change_v2.csv")
 sensor_locations <-vect(depth_change_csv, geom = c("x","y"), crs = crs(stack))
 plot(sensor_locations)
-sensor_locations
+sensor_locations$name
 
 # bring snow depth sensor locations shapefile for cropping
 loc_raw <-vect("./climate_station_data/pingers_location_new.shp")
@@ -90,39 +91,53 @@ feb19_26 <-stack[[4]]
 ### compare insitu depth change to insar swe change
 ###########################
 
+# check names and numbers
+O2_1 <-terra::extract(feb12_19, sensor_locations[1],  cells = TRUE, xy = TRUE, method = 'bilinear')
+E1_3 <-terra::extract(feb12_19, sensor_locations[2],  cells = TRUE, xy = TRUE, method = 'bilinear')
+O1_4 <-terra::extract(feb12_19, sensor_locations[3],  cells = TRUE, xy = TRUE, method = 'bilinear')
+O3_6 <-terra::extract(feb12_19, sensor_locations[4],  cells = TRUE, xy = TRUE, method = 'bilinear')
+C2_7 <-terra::extract(feb12_19, sensor_locations[5],  cells = TRUE, xy = TRUE, method = 'bilinear')
+E3_9 <-terra::extract(feb12_19, sensor_locations[6],  cells = TRUE, xy = TRUE, method = 'bilinear')
+VG_met <-terra::extract(feb12_19, sensor_locations[7],  cells = TRUE, xy = TRUE, method = 'bilinear')
+
 #### czo sensors
 ## feb 12-19
-test <-c(adjacent(feb12_19, cells = feb12_19_dswe$cell, directions ="8"))
-test
-feb12_19_dswe <-terra::extract(feb12_19, sensor_locations,  cells = TRUE, xy = TRUE)
-colnames(feb12_19_dswe)[2] <-"insar_feb12_19_dswe"
+feb12_19_dswe <-terra::extract(feb12_19, sensor_locations,  cells = TRUE, xy = TRUE, method = 'bilinear')
+feb12_19_dswe <-cbind(depth_change_csv$name,depth_change_csv$number, feb12_19_dswe)
+feb12_19_dswe
+colnames(feb12_19_dswe)[c(1,2,4)] <-c("name","number", "insar_feb12_19_dswe")
 feb12_19_dswe
 
+#
+test <-c(adjacent(feb12_19, cells = feb12_19_dswe$cell, directions ="8"))
+test
+
 ## feb 19-26
-feb19_26_dswe <-terra::extract(feb19_26, sensor_locations,  cells = TRUE, xy = TRUE)
-colnames(feb19_26_dswe)[2] <-"insar_feb19_26_dswe"
+feb19_26_dswe <-terra::extract(feb19_26, sensor_locations,  cells = TRUE, xy = TRUE, method = 'bilinear')
+feb19_26_dswe <-cbind(depth_change_csv$name,depth_change_csv$number, feb19_26_dswe )
+colnames(feb19_26_dswe)[c(1,2,4)] <-c("name","number","insar_feb19_26_dswe")
 feb19_26_dswe
 
+
 ## feb 12-26
-feb12_26_dswe <-terra::extract(feb12_26, sensor_locations,  cells = TRUE, xy = TRUE)
-colnames(feb12_26_dswe)[2] <-"insar_feb12_26_dswe"
+feb12_26_dswe <-terra::extract(feb12_26, sensor_locations,  cells = TRUE, xy = TRUE, method = 'bilinear')
+feb12_26_dswe <-cbind(depth_change_csv$name,depth_change_csv$number, feb12_26_dswe )
+colnames(feb12_26_dswe)[c(1,2,4)] <-c("name","number","insar_feb12_26_dswe")
 feb12_26_dswe
 
 #### BA pit
 ## feb 12-19
-ba_feb12_19_dswe <-terra::extract(feb12_19, ba_location,  cells = TRUE, xy = TRUE)
+ba_feb12_19_dswe <-terra::extract(feb12_19, ba_location,  cells = TRUE, xy = TRUE, method = 'bilinear')
 colnames(ba_feb12_19_dswe)[2] <-"insar_feb12_19_dswe"
 ba_feb12_19_dswe
 
-??terra::extract
-
 ## feb 19-26
-ba_feb19_26_dswe <-terra::extract(feb19_26, ba_location,  cells = TRUE, xy = TRUE)
+ba_feb19_26_dswe <-terra::extract(feb19_26, ba_location,  cells = TRUE, xy = TRUE, method = 'bilinear')
 colnames(ba_feb19_26_dswe)[2] <-"insar_feb19_26_dswe"
 ba_feb19_26_dswe
 
 ## feb 12-26
-ba_feb12_26_dswe <-terra::extract(feb12_26, ba_location,  cells = TRUE, xy = TRUE)
+ba_feb12_26_dswe <-terra::extract(feb12_26, ba_location,  cells = TRUE, xy = TRUE, method = 'bilinear')
 colnames(ba_feb12_26_dswe)[2] <-"insar_feb12_26_dswe"
 ba_feb12_26_dswe
 
@@ -268,11 +283,10 @@ lm_df_v2 <-rbind(lm_df, ba_dat)
 lm_df_v2
 names(lm_df_v2)[1:2] <-c("y","x") # y = insar, x = insitu
 
+# tgest
 cor(lm_df_v2$y, lm_df_v2$x)
 hmmt <-lm(lm_df_v2$y ~ lm_df_v2$x)
 summary(hmmt)
-
-?lm
 
 # stats
 # function for running lm, plotting equation and r2 
