@@ -283,7 +283,7 @@ lm_df_v2 <-rbind(lm_df, ba_dat)
 lm_df_v2
 names(lm_df_v2)[1:2] <-c("y","x") # y = insar, x = insitu
 
-# tgest
+# test
 cor(lm_df_v2$y, lm_df_v2$x)
 hmmt <-lm(lm_df_v2$y ~ lm_df_v2$x)
 summary(hmmt)
@@ -442,6 +442,12 @@ mae_lab_v2 <-paste0("MAE = ",mae_v2," cm")
 lm_df_gpr <-plotting_df_gpr[-c(1:3,5)]
 head(lm_df_gpr)
 names(lm_df_gpr)[1:2] <-c("y","x") # y = insar, x = gpr
+
+# test lm
+?cor
+cor(lm_df_gpr$y, lm_df_gpr$x)
+gpr_lm <-lm(lm_df_gpr$y ~ lm_df_gpr$x)
+summary(gpr_lm)
 
 # add labels
 gpr_v2 <- gpr + geom_label(x = -4.5, y = 5.5, label = lm_eqn(lm_df_gpr), parse = TRUE, label.size = NA, fontface = "bold") +
