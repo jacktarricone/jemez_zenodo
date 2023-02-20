@@ -4,6 +4,39 @@
 # jan 16th, 2022
 
 library(terra)
+library(ggplot2)
+
+# set custom theme
+theme_classic <- function(base_size = 11, base_family = "",
+                          base_line_size = base_size / 22,
+                          base_rect_size = base_size / 22) {
+  theme_bw(
+    base_size = base_size,
+    base_family = base_family,
+    base_line_size = base_line_size,
+    base_rect_size = base_rect_size
+  ) %+replace%
+    theme(
+      # no background and no grid
+      panel.border     = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      
+      # show axes
+      # axis.line      = element_line(colour = "black", linewidth = rel(1)),
+      
+      # match legend key to panel.background
+      legend.key       = element_blank(),
+      
+      # simple, black and white strips
+      strip.background = element_rect(fill = "white", colour = "black", linewidth = rel(2)),
+      # NB: size is 1 but clipped, it looks like the 0.5 of the axes
+      
+      complete = TRUE
+    )
+}
+
+theme_set(theme_classic(14))
 
 # set working dir
 setwd("/Users/jacktarricone/ch1_jemez/gpr_rasters_ryan/new_swe_change")
@@ -238,7 +271,7 @@ vg_stats <-data.frame("name" = c("pair1", "pair2", "pair3", "pair4"),
 vg_stats # check
 fs_stats
 
-write.csv(fs_stats, "/Users/jacktarricone/ch1_jemez/pit_data/vg_scene_swe_stats.csv")
+# write.csv(fs_stats, "/Users/jacktarricone/ch1_jemez/pit_data/vg_scene_swe_stats.csv")
 
 ##############
 ### north  ###
@@ -291,7 +324,7 @@ vg_stats # check
 fs_stats
 north_stats
 
-write.csv(north_stats, "/Users/jacktarricone/ch1_jemez/pit_data/north_swe_stats.csv")
+# write.csv(north_stats, "/Users/jacktarricone/ch1_jemez/pit_data/north_swe_stats.csv")
 
 ##############
 ### south  ###
@@ -346,7 +379,7 @@ vg_stats
 north_stats
 south_stats
 
-write.csv(south_stats, "/Users/jacktarricone/ch1_jemez/pit_data/south_swe_stats.csv")
+# write.csv(south_stats, "/Users/jacktarricone/ch1_jemez/pit_data/south_swe_stats.csv")
 
 
 ####
@@ -387,12 +420,13 @@ fs_12_v1 <-ggplot()+
                      breaks = seq(-8,8,2), 
                      expand = c(0,0)) + 
   ylab("Count") +
+  xlab(expression(Delta~'SWE'))+
   scale_y_continuous(expand = c(0,0), limits = c(0,1.2e6), labels=fancy_scientific) +
   theme(legend.position = c(.21,.82)) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
-        axis.title.x=element_blank())
+        axis.title.y=element_blank())
 
-plot(fs_12_v1)
+# plot(fs_12_v1)
 
 fs_1_lab <-c(paste0("Mean = ",p1_mean_fs,"\n","SD = ",p1_sd_fs))
 fs_1_lab
@@ -408,6 +442,9 @@ fs_12 <- fs_12_v1 +
   annotate(geom="text", x=4.2, y=6e5, label= fs_2_lab)
 
 print(fs_12)
+
+
+
 
 
 
