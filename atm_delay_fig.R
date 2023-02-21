@@ -182,9 +182,11 @@ lm_eqn <- function(df){
 eq_label <-lm_eqn(lm_df)
 print(eq_label)
 
+show_colors(labels = TRUE)
+
 ## plot 
 p12 <-ggplot(snow_df, aes(plv_km, unwrapped_phase)) +
-  geom_bin_2d(bins = 50) +
+  geom_bin_2d(bins = 40) +
   scale_fill_gradient(low = "white", high = "darkseagreen") +
   geom_smooth(method = "lm", color = "black", se = FALSE) +
   annotate("text", x = 14, y = 4, parse = TRUE,
@@ -271,12 +273,11 @@ p13 <-ggplot(no_snow_df, aes(plv_km, unwrapped_phase)) +
            label = "italic(y) == \"-4.5\" + \"0.26\" %.% italic(x) * \",\" ~ ~italic(r)^2 ~ \"=\" ~ \"0.81\"") +
   ylim(-5,5) + xlim(10,30)+
   labs(#title = "Jemez Radar Path Length vs. Unwrapped Phase 2/12-2/19",
-    x = "PLV (km)",
+    x = "LKV (km)",
     y = "Unwrapped Phase (radians)")+
   theme(panel.border = element_rect(colour = "black", fill=NA, size = 1),
         legend.position = c(.85, .30),
-        legend.key.size = unit(.5, 'cm'),
-        axis.title.x=element_blank())
+        legend.key.size = unit(.5, 'cm'))
 
 print(p13)
 
@@ -284,15 +285,20 @@ print(p13)
 # combine
 figure <-plot_grid(p12, p13, 
                    labels = c("(a)", "(b)"),
-                   ncol = 1, nrow = 2)
+                   align = "v",
+                   nrow = 2,
+                   vjust = 2.2,
+                   hjust = -4,
+                   rel_heights = c(.48, .52))
+
 plot(figure)
 
 # save
 ggsave(figure,
-       file = "/saving/location/fig05.pdf",
+       file = "/Users/jacktarricone/ch1_jemez/plots/atm_delay_fig_v2.pdf",
        width = 6,
        height = 7,
-       dpi = 400)
+       dpi = 500)
 
 
 ### correct unw data using path length and the linear estimation we generated
