@@ -63,15 +63,6 @@ plot(vg, add = TRUE)
 ns_no_vg <-mask(lidar_ns, vg, inverse = TRUE)
 plot(ns_no_vg)
 
-# bring in snow mask
-fsca_mask_0218 <-rast("/Users/jacktarricone/ch1_jemez/landsat_fsca/0218_mask.tif")
-values(fsca_mask_0218)[values(fsca_mask_0218) < -998] = 999
-plot(fsca_mask_0218)
-
-## resample scale down to 5.6 m
-no_snow_mask <-resample(fsca_mask_0218, lidar_ns)
-plot(no_snow_mask, col = 'red')
-
 ####### load in rasters
 # pair 1
 feb12_19_r <-rast("dswe_feb12-19_sp.tif")
@@ -185,7 +176,7 @@ names(p4_south_df)[1] <-"dswe"
 #####################
 
 ##################
-### full scene ###
+### Full Study Area ###
 ##################
 
 ##########
@@ -426,7 +417,7 @@ fancy_scientific <- function(l) {
 
 ####################
 ####################
-## full scene pair 1 & 2
+## Full Study Area pair 1 & 2
 ####################
 ####################
 
@@ -460,7 +451,7 @@ fs_2_lab <-c(paste0("Mean = ",p2_mean_fs,"\n","SD = ",p2_sd_fs))
 fs_2_lab
 
 fs_12 <- fs_12_v1 + 
-  annotate(geom="text", x=4.2, y=1.1e6, label= "Full Scene", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=1.1e6, label= "Full Study Area", size = 5, fontface = "bold") +
   annotate(geom="text", x=4.2, y=9.5e5, label= "12 - 19 Feb.", fontface = "bold") +
   annotate(geom="text", x=4.2, y=8.5e5, label= fs_1_lab) +
   annotate(geom="text", x=4.2, y=7e5, label= "19 - 26 Feb.", fontface = "bold") +
@@ -661,7 +652,7 @@ ggsave2("/Users/jacktarricone/ch1_jemez/plots/dswe_p1p2_v1.pdf",
 
 ####################
 ####################
-## full scene pair 3 & 4
+## Full Study Area pair 3 & 4
 ####################
 ####################
 
@@ -695,7 +686,7 @@ fs_4_lab <-c(paste0("Mean = ",p4_mean_fs,"\n","SD = ",p4_sd_fs))
 fs_4_lab
 
 fs_34 <- fs_34_v1 + 
-  annotate(geom="text", x=4.2, y=1.1e6, label= "Full Scene", size = 5, fontface = "bold") +
+  annotate(geom="text", x=4.2, y=1.1e6, label= "Full Study Area", size = 5, fontface = "bold") +
   annotate(geom="text", x=4.2, y=9.5e5, label= "12-26 Feb.", fontface = "bold") +
   annotate(geom="text", x=4.2, y=8.5e5, label= fs_3_lab) +
   annotate(geom="text", x=4.2, y=7e5, label= "12-26 Feb. CM", fontface = "bold") +
@@ -886,8 +877,8 @@ p3p4 <-plot_grid(fs_34, vg_34, north_34, south_34,
 
 plot(p3p4)
 
-x.grob <- textGrob(expression(Delta ~ 'SWE'),
-                   gp=gpar(fontface="bold", col="black", fontsize=20))
+x.grob <- textGrob(expression(Delta ~ 'SWE (cm)'),
+                   gp=gpar(fontface="bold", col="black", fontsize=24))
 
 y.grob <- textGrob('Count',
                    gp=gpar(fontface="bold", col="black", fontsize=17), rot=90)
@@ -895,7 +886,7 @@ y.grob <- textGrob('Count',
 final_p3p4 <-grid.arrange(arrangeGrob(p3p4, left = y.grob, bottom = x.grob))
 plot(final_p3p4)
 
-ggsave2("/Users/jacktarricone/ch1_jemez/plots/dswe_p3p4_v1.pdf",
+ggsave2("/Users/jacktarricone/ch1_jemez/plots/dswe_p3p4_v2.pdf",
         final_p3p4,
        width = 18, 
        height = 4,
@@ -912,7 +903,7 @@ ggsave2("/Users/jacktarricone/ch1_jemez/plots/dswe_p3p4_v1.pdf",
 
 final_1234 <-plot_grid(final_p1p2, final_p3p4, align = "v", nrow = 2, rel_heights = c(.48, .52))
 
-ggsave2("/Users/jacktarricone/ch1_jemez/plots/dswe_hist_full_v1.pdf",
+ggsave2("/Users/jacktarricone/ch1_jemez/plots/dswe_hist_full_v3.pdf",
         final_1234,
         width = 18, 
         height = 8,
