@@ -399,6 +399,10 @@ gpr_df <-as.data.frame(f26_m_12_mask, xy = TRUE, cells = TRUE, na.rm = TRUE)
 head(gpr_df)
 head(cm_df)
 
+# gpr n pixels over o
+number <-filter(gpr_df, feb26_minus_Feb12_bias_corrected1 > 0)
+percent <-(nrow(number)/nrow(gpr_df))*100
+
 # bind the data frames
 plotting_df_gpr <-cbind(df, cm_df[,4] ,gpr_df[,4])
 head(plotting_df_gpr)
