@@ -18,7 +18,7 @@ vg
 
 ######  calculate the total number of pixels from the coherence image from each date
 # feb 12-19
-feb_12_19_hh_path <-list.files("./feb12-19/", pattern = "*HH_01.cor*", full.names = TRUE)
+feb_12_19_hh_path <-list.files("./feb12-19", pattern = "*HH_01.cor*", full.names = TRUE)
 hh_cor <-rast(feb_12_19_hh_path)
 values(hh_cor)[values(hh_cor) == 0] <-NA
 p1_total_pixels <-as.numeric(global(hh_cor, fun="notNA"))
