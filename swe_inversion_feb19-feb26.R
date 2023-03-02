@@ -1,6 +1,7 @@
-# SWE inversion for 2/12-2/26
+# SWE inversion for 2/19-2/26
 # jack tarricone
-# using isce processed 12-26 raster
+# july 18th, 2022
+
 
 library(terra)
 library(ggplot2)
@@ -9,8 +10,8 @@ library(ggplot2)
 setwd("/Users/jacktarricone/ch1_jemez/gpr_rasters_ryan/")
 list.files() #pwd
 
-# import corrected unwrapped phase data 
-unw_raw <-rast("unw_corrected_feb12-26.tif")
+# import corrected unwrapped phase data
+unw_raw <-rast("unw_feb19-feb26.tif")
 plot(unw_raw)
 
 # import i_angle raster and resample to unw grid bc of slight extent difference
@@ -64,25 +65,27 @@ head(pit_info)
 
 # ## define static information from pits
 # # calculate density
-mean_density_feb12 <- pit_info$mean_density[1]
+mean_density_feb19 <- pit_info$mean_density[2]
 mean_density_feb26 <- pit_info$mean_density[3]
-# 
+#
 # # mean density between two flights
-mean_density_feb12_26 <-(mean_density_feb12 + mean_density_feb26)/2
+mean_density_feb19_26 <-(mean_density_feb19 + mean_density_feb26)/2
+mean_density_feb19_26
 
 # dielctric constant k
-k_feb12 <- pit_info$mean_k[1]
+k_feb19 <- pit_info$mean_k[2]
 k_feb26 <- pit_info$mean_k[3]
 
 # mean k between two flights
-mean_k_feb12_26 <-(k_feb12+k_feb26)/2
-mean_k_feb12_26
+mean_k_feb19_26 <-(k_feb19+k_feb26)/2
+mean_k_feb19_26
 
 #######################
 #### swe inversion ####
 #######################
 
 # first step, define function for insar constant
+
 # inc = incidence angle raster [deg]
 # wL = sensor save length [cm]
 # k = dielectric permittivty 
@@ -96,14 +99,14 @@ devtools::source_url("https://raw.githubusercontent.com/jacktarricone/snowex_uav
 # testing
 depth_change <-depth_from_phase(delta_phase = unw,
                                 inc_angle = lidar_inc,
-                                perm = mean_k_feb12_26,
+                                perm = mean_k_feb19_26,
                                 wavelength = uavsar_wL)
 
 plot(depth_change)
 hist(depth_change, breaks = 100)
 
 # convert to SWE change
-dswe_raw <-depth_change*(mean_density_feb12_26/1000)
+dswe_raw <-depth_change*(mean_density_feb19_26/1000)
 plot(dswe_raw)
 hist(dswe_raw, breaks = 100)
 # writeRaster(dswe_raw,"./final_swe_change/raw_dswe_feb12_26.tif")
@@ -153,12 +156,13 @@ mean_pit_dswe
 dswe_abs <-dswe_raw - mean_pit_dswe
 plot(dswe_abs)
 hist(dswe_abs, breaks = 100)
-# writeRaster(dswe_abs, "./no_fsca_mask/p3_dswe_no_mask.tif")
+# writeRaster(dswe_abs, "./no_fsca_mask/p2_dswe_no_mask.tif")
 
 # mask for no snow areas
-dswe_no_snow <-mask(dswe_abs, snow_mask, maskvalue = NA)
-dswe_no_snow
-plot(dswe_no_snow)
+dswe_snow <-mask(dswe_abs, snow_mask, maskvalue = NA)
+dswe_snow
+plot(dswe_snow)
 
 # save
-# writeRaster(dswe_abs,"./final_swe_change/dswe_feb20-26.tif")
+writeRaster(dswe_abs,"./new_swe_change/dswe_feb19-26.tif")
+
