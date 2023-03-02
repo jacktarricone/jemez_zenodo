@@ -10,7 +10,9 @@ setwd("/Users/jacktarricone/ch1_jemez/gpr_rasters_ryan/")
 list.files() #pwd
 
 # import corrected unwrapped phase data 
-unw_raw <-rast("./unw_corrected_feb12-19.tif")
+p1_unw_raw <-rast("./unw_corrected_feb12-19.tif")
+p2_unw_raw <-rast("./unw_feb19-feb26.tif")
+plot(p2_unw_raw)
 # plot(unw_raw)
 
 # import i_angle raster and resample to unw grid bc of slight extent difference
@@ -86,9 +88,13 @@ k_feb19 <- pit_info$mean_k[2]
 mean_k_feb12_19 <-(k_feb12+k_feb19)/2
 mean_k_feb12_19
 
-#######################
-#### swe inversion ####
-#######################
+##############################################
+##############################################
+##############################################
+############## feb 12-19 ####################
+##############################################
+##############################################
+##############################################
 
 # first step, define function for insar constant
 
@@ -103,10 +109,10 @@ uavsar_wL <- 23.8403545
 devtools::source_url("https://raw.githubusercontent.com/jacktarricone/snowex_uavsar/master/insar_swe_functions.R")
 
 # snow covered pixels
-depth_change <-depth_from_phase(delta_phase = unw,
-                                inc_angle = lidar_inc,
-                                perm = mean_k_feb12_19,
-                                wavelength = uavsar_wL)
+p1_depth_change <-depth_from_phase(delta_phase = unw,
+                                   inc_angle = lidar_inc,
+                                   perm = mean_k_feb12_19,
+                                   wavelength = uavsar_wL)
 
 plot(depth_change)
 hist(depth_change, breaks = 100)
@@ -160,6 +166,8 @@ mean_pit_dswe
 # therefor pixels around the pit will show no swe change
 # which is consistent with what was observed on the ground
 dswe_abs <-dswe_raw - mean_pit_dswe
+plot(dswe_abs)
+writeRaster(dswe_abs, "./no_fsca_mask/p1_dswe_no_mask.tif")
 
 # mask for no snow areas
 dswe_no_snow <-mask(dswe_abs, snow_mask, maskvalue = NA, inverse = TRUE)
@@ -209,6 +217,9 @@ hist(dswe_snow, breaks = 200)
 hist(dswe_no_snow, breaks = 20, add = TRUE, col = 'red')
 
 
-kable
+
+
+
+
 # save
 writeRaster(dswe_abs,"./new_swe_change/rough/no_snow_dswe_feb12-26_new.tif")
