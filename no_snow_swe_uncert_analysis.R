@@ -6,180 +6,101 @@ library(terra)
 library(ggplot2)
 
 # set home folder
-setwd("/Users/jacktarricone/ch1_jemez/gpr_rasters_ryan/")
+setwd("/Users/jacktarricone/ch1_jemez/rasters")
 list.files() #pwd
 
-# import corrected unwrapped phase data 
-p1_unw_raw <-rast("./unw_corrected_feb12-19.tif")
-p2_unw_raw <-rast("./unw_feb19-feb26.tif")
-plot(p2_unw_raw)
-# plot(unw_raw)
-
-# import i_angle raster and resample to unw grid bc of slight extent difference
-lidar_inc_raw <-rast("lidar_inc_rad.tif")
-lidar_inc_v1 <-resample(lidar_inc_raw, unw_raw)
-
-# set crop extent and crop for better visualization
-vg_aoi <-vect("/Users/jacktarricone/ch1_jemez/vector_data/valle_grande_aoi.geojson")
-lidar_inc <-crop(lidar_inc_v1, vg_aoi)
-
-# mask and crop unwrapped phase data down to extent on new inc angle raster
-unw_crop <-crop(unw_raw, vg_aoi)
-unw <-mask(unw_crop, lidar_inc)
-
-# plot results
-# plot(lidar_inc)
-# plot(unw)
-
-####################################
-###### bring in fsca layers ########
-####################################
+# bring in unmasked rasters
+p1 <-rast("./no_snow_uncert/p1_dswe_no_mask.tif")
+plot(p1)
+p2 <-rast("./no_snow_uncert/p2_dswe_no_mask.tif")
+plot(p2)
+p3 <-rast("./no_snow_uncert/p3_dswe_no_mask.tif")
+plot(p3)
 
 # fsca
-fsca_raw <-rast("landsat_fsca_2-18.tif")
+snow_mask <-rast("./fsca/study_area_02_18_2020_snow_mask.tif")
 
-# crop to .inc angle extent and mask
-fsca_crop <-crop(fsca_raw, vg_aoi)
-fsca <-mask(fsca_crop, lidar_inc)
-# plot(fsca)
+# p1 for no and snow
+p1_snow <-mask(p1, snow_mask, maskvalue = NA)
+p1_no <-mask(p1, snow_mask, maskvalue = NA, inverse = TRUE)
+plot(p1_no)
 
-# create snow mask
-snow_mask <-fsca
-values(snow_mask)[values(snow_mask) > 15] = 1
-plot(snow_mask)
-# writeRaster(snow_mask,"02_18_2020_snow_mask.tif")
+# p2 for no and snow
+p2_snow <-mask(p2, snow_mask, maskvalue = NA)
+p2_no <-mask(p2, snow_mask, maskvalue = NA, inverse = TRUE)
+plot(p2_no)
 
-# # masked the unwrapped phase with snow mask
-# unw_snow <-mask(unw, snow_mask, maskvalue = NA)
-# unw_no_snow <-mask(unw, snow_mask, maskvalue = NA, inverse = TRUE)
-# plot(unw)
-# plot(unw_snow)
-# plot(unw_no_snow)
+# p3 for no and snow
+p3_snow <-mask(p3, snow_mask, maskvalue = NA)
+p3_no <-mask(p3, snow_mask, maskvalue = NA, inverse = TRUE)
+plot(p3_no)
 
-########################################################
-######### converting phase change to SWE ##############
-########################################################
+# stack the no snow
+p123_no <-c(p1_no,p2_no,p3_no)
+p123_no
 
-#######################################################################
-# don't pick denisty and di_elec value
-# pick a density and LWC (from ryans equations and field measurements)
-# vary density and LWC over range over measured values
-########################################################################
+# stack the snow
+p123_snow <-c(p1_snow,p2_snow,p3_snow)
+p123_snow
 
-# table ryan sent over
-### use NSIDC data
-pit_info <-read.csv("/Users/jacktarricone/ch1_jemez/pit_data/perm_pits.csv")
-head(pit_info)
+# mean
+t1 <-as.numeric(global(p123_no[[1]], mean, na.rm = TRUE))
+t2 <-as.numeric(global(p123_no[[2]], mean, na.rm = TRUE))
+t3 <-as.numeric(global(p123_no[[3]], mean, na.rm = TRUE))
 
-# ## define static information from pits
-# # calculate density
-mean_density_feb12 <- pit_info$mean_density[1]
-mean_density_feb19 <- pit_info$mean_density[2]
+sd1 <-as.numeric(global(p123_no[[1]], sd, na.rm = TRUE))
+sd2 <-as.numeric(global(p123_no[[2]], sd, na.rm = TRUE))
+sd3 <-as.numeric(global(p123_no[[3]], sd, na.rm = TRUE))
 
-# # mean density between two flights
-mean_density_feb12_19 <-(mean_density_feb12 + mean_density_feb19)/2
-mean_density_feb12_19
+# test hists
+hist(p123_no[[3]], breaks = 50, col = 'blue')
+hist(p123_no[[2]], breaks = 50, col = 'red', add = TRUE, alpha = .5)
+hist(p123_no[[1]], breaks = 50, add = TRUE)
 
-# dielctric constant k
-k_feb12 <- pit_info$mean_k[1]
-k_feb19 <- pit_info$mean_k[2]
+hist(p123_snow[[3]], breaks = 100, col = 'blue')
+hist(p123_snow[[2]], breaks = 100, col = 'red', add = TRUE, alpha = .5)
+hist(p123_snow[[1]], breaks = 200, add = TRUE)
 
-# mean k between two flights
-mean_k_feb12_19 <-(k_feb12+k_feb19)/2
-mean_k_feb12_19
+# make df for now snow
+no_snow_df <-as.data.frame(p123_no, xy = TRUE)
+colnames(no_snow_df)[3:5] <-c('p1','p2','p3')
+head(no_snow_df)
 
-##############################################
-##############################################
-##############################################
-############## feb 12-19 ####################
-##############################################
-##############################################
-##############################################
+# bind
+all_no_dswe <-data.frame(c(no_snow_df$p1, no_snow_df$p2, no_snow_df$p3),
+                         group = 'no_snow')
 
-# first step, define function for insar constant
+colnames(all_no_dswe)[1] <-c('dswe')
+hist(all_no_dswe$dswe, breaks = 100)
 
-# inc = incidence angle raster [deg]
-# wL = sensor save length [cm]
-# k = dielectric permittivty 
+total_no_mean <-mean(all_no_dswe$dswe, na.rm = TRUE)
+total_no_sd <-sd(all_no_dswe$dswe, na.rm = TRUE)
+total_no_iqr <-IQR(all_no_dswe$dswe, na.rm = TRUE)
 
-# radar wave length from uavsar annotation file
-uavsar_wL <- 23.8403545
+# make df for now snow
+snow_df <-as.data.frame(p123_snow, xy = TRUE)
+colnames(snow_df)[3:5] <-c('p1','p2','p3')
+head(snow_df)
 
-# import depth_from_phase function
-devtools::source_url("https://raw.githubusercontent.com/jacktarricone/snowex_uavsar/master/insar_swe_functions.R")
+# bind
+all_snow_dswe <-data.frame(c(snow_df$p1, snow_snow_df$p2, snow_snow_df$p3), 
+                           group = 'snow')
+colnames(all_snow_dswe)[1] <-c('dswe')
+hist(all_snow_dswe$dswe, breaks = 100)
 
-# snow covered pixels
-p1_depth_change <-depth_from_phase(delta_phase = unw,
-                                   inc_angle = lidar_inc,
-                                   perm = mean_k_feb12_19,
-                                   wavelength = uavsar_wL)
+total_snow_mean <-mean(all_snow_dswe$dswe, na.rm = TRUE)
+total_snow_sd <-sd(all_snow_dswe$dswe, na.rm = TRUE)
+total_snow_iqr <-IQR(all_snow_dswe$dswe, na.rm = TRUE)
 
-plot(depth_change)
-hist(depth_change, breaks = 100)
+hist(all_snow_dswe$dswe, breaks = 200)
+hist(all_no_dswe$dswe, breaks = 20, add = TRUE, col = 'red')
 
-# convert to SWE change
-dswe_raw <-depth_change*(mean_density_feb12_19/1000)
-plot(dswe_raw)
-hist(dswe_raw, breaks = 100)
-# writeRaster(dswe_raw,"./final_swe_change/raw_dswe_feb12_26.tif")
+# bind for plotting
+plotting_df <-rbind(all_no_dswe, all_snow_dswe)
 
-#######################################
-### calculating absolute SWE change ###
-#######################################
-
-# using swe change from the pit as "known" change point
-
-# extent around gpr transect
-gpr <-ext(-106.5255, -106.521, 35.856, 35.8594)
-dswe_crop <-crop(dswe_raw, gpr)
-plot(dswe_crop)
-
-# pull out location info into separate df
-loc <-data.frame(lat = pit_info$lat[1],
-                 lon = pit_info$lon[1])
-
-# plot pit location using terra vector funcitonality
-pit_point <-vect(loc, geom = c("lon","lat"), crs = crs(unw))
-points(pit_point, cex = 1)
-
-# extract cell number from pit lat/lon point
-pit_cell_v1 <-cells(dswe_raw, pit_point)
-cell_number <-pit_cell_v1[1,2]
-cell_number
-
-# define neighboring cells by number and create a vector
-neighbor_cells <-c(adjacent(dswe_raw, cells = cell_number, directions ="8"))
-
-# add orginal cell back to vector
-cell_vector <-c(cell_number, neighbor_cells)
-cell_vector
-
-# extract using that vector
-nine_cell_dswe <-terra::extract(dswe_raw, cell_vector, xy = TRUE)
-nine_cell_dswe
-
-# mean of 9 swe changes around
-mean_pit_dswe <-mean(nine_cell_dswe[1:9,3])
-mean_pit_dswe
-
-# subtract average swe change value to great absolute swe change
-# therefor pixels around the pit will show no swe change
-# which is consistent with what was observed on the ground
-dswe_abs <-dswe_raw - mean_pit_dswe
-plot(dswe_abs)
-writeRaster(dswe_abs, "./no_fsca_mask/p1_dswe_no_mask.tif")
-
-# mask for no snow areas
-dswe_no_snow <-mask(dswe_abs, snow_mask, maskvalue = NA, inverse = TRUE)
-dswe_no_snow
-plot(dswe_no_snow)
-
-# snow
-dswe_snow <-mask(dswe_abs, snow_mask, maskvalue = NA)
-dswe_snow
-plot(dswe_snow)
-hist(dswe_snow, breaks = 100)
-
+ggplot(plotting_df, aes(dswe, fill=group, colour=group)) +
+  geom_density(alpha=0.4, lwd=0.8, adjust=0.5) 
+  
 # mean
 mean_no <-as.numeric(global(dswe_no_snow, mean, na.rm = TRUE))
 mean_no

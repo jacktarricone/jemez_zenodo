@@ -10,7 +10,7 @@ setwd("/Users/jacktarricone/ch1_jemez/gpr_rasters_ryan/")
 list.files() #pwd
 
 # import corrected unwrapped phase data 
-unw_raw <-rast("unw_corrected_feb12-26.tif")
+unw_raw <-rast("unw_corrected_new_feb12-26.tif")
 plot(unw_raw)
 
 # import i_angle raster and resample to unw grid bc of slight extent difference
@@ -45,7 +45,7 @@ plot(fsca)
 snow_mask <-fsca
 values(snow_mask)[values(snow_mask) > 15] = 1
 plot(snow_mask)
-# writeRaster(snow_mask,"02_18_2020_snow_mask.tif")
+# writeRaster(snow_mask,"study_area_02_18_2020_snow_mask.tif")
 
 ########################################################
 ######### converting phase change to SWE ##############
@@ -153,7 +153,7 @@ mean_pit_dswe
 dswe_abs <-dswe_raw - mean_pit_dswe
 plot(dswe_abs)
 hist(dswe_abs, breaks = 100)
-# writeRaster(dswe_abs, "./no_fsca_mask/p3_dswe_no_mask.tif")
+writeRaster(dswe_abs, "/Users/jacktarricone/ch1_jemez//rasters/p3_dswe_no_mask.tif")
 
 # mask for no snow areas
 dswe_no_snow <-mask(dswe_abs, snow_mask, maskvalue = NA)
