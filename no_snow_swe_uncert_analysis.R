@@ -22,16 +22,19 @@ snow_mask <-rast("./fsca/study_area_02_18_2020_snow_mask.tif")
 
 # p1 for no and snow
 p1_snow <-mask(p1, snow_mask, maskvalue = NA)
+plot(p1_snow)
 p1_no <-mask(p1, snow_mask, maskvalue = NA, inverse = TRUE)
 plot(p1_no)
 
 # p2 for no and snow
 p2_snow <-mask(p2, snow_mask, maskvalue = NA)
+plot(p2_snow)
 p2_no <-mask(p2, snow_mask, maskvalue = NA, inverse = TRUE)
 plot(p2_no)
 
 # p3 for no and snow
 p3_snow <-mask(p3, snow_mask, maskvalue = NA)
+plot(p3_snow)
 p3_no <-mask(p3, snow_mask, maskvalue = NA, inverse = TRUE)
 plot(p3_no)
 
@@ -83,7 +86,7 @@ colnames(snow_df)[3:5] <-c('p1','p2','p3')
 head(snow_df)
 
 # bind
-all_snow_dswe <-data.frame(c(snow_df$p1, snow_snow_df$p2, snow_snow_df$p3), 
+all_snow_dswe <-data.frame(c(snow_df$p1, snow_df$p2, snow_df$p3), 
                            group = 'snow')
 colnames(all_snow_dswe)[1] <-c('dswe')
 hist(all_snow_dswe$dswe, breaks = 100)
@@ -99,8 +102,16 @@ hist(all_no_dswe$dswe, breaks = 20, add = TRUE, col = 'red')
 plotting_df <-rbind(all_no_dswe, all_snow_dswe)
 
 ggplot(plotting_df, aes(dswe, fill=group, colour=group)) +
-  geom_density(alpha=0.4, lwd=0.8, adjust=0.5) 
+  geom_density(alpha=0.4, lwd=0.8, adjust=0.5) +
+  xlab('dSWE (cm)') +
+  theme_classic(12)
   
+
+
+
+
+
+
 # mean
 mean_no <-as.numeric(global(dswe_no_snow, mean, na.rm = TRUE))
 mean_no
