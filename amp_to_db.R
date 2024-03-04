@@ -1,9 +1,12 @@
-# convert linear amp to db for the three aquisitions
+# convert linear amp to db for amplitude data
 # jack tarricone
 
 library(terra)
 
-setwd("/Users/jacktarricone/ch1_jemez/")
+# set path to '/jemez_lband_swe_code_data' that was downloaded and unzipped from zenodo
+# all other file paths are relative
+setwd("path/to/jemez_lband_swe_code_data")
+list.files() #pwd
 
 ## bring in lin amps
 # 12-19 feb

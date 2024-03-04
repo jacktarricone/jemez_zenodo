@@ -2,6 +2,14 @@
 # jack tarricone
 # july 18, 2022
 
+leinss_swe <- function(phase, alpha, inc_angle) {
+  
+  wavelength <- 0.238403545
+  k <- 2 * pi / wavelength
+  return(phase / (alpha * k * (1.59 + inc_angle^2.5)))
+}
+
+
 depth_from_phase <-function(delta_phase, inc_angle, perm, wavelength = 23.8403545){
   
   delta_z = (-delta_phase * wavelength) / (4 * pi * (cos(inc_angle) - sqrt(perm - sin(inc_angle)^2)))
